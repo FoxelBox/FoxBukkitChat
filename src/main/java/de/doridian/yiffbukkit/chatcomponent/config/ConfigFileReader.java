@@ -1,4 +1,6 @@
-package de.doridian.yiffbukkit.chatcomponent;
+package de.doridian.yiffbukkit.chatcomponent.config;
+
+import de.doridian.yiffbukkit.chatcomponent.YBChatComponent;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

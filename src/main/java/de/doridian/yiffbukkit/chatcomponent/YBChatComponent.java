@@ -23,6 +23,7 @@ public class YBChatComponent extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		super.onEnable();
+		RedisManager.initialize();
 		RedisHandler.initialize();
 		getServer().getPluginManager().registerEvents(new YBChatListener(), this);
 		getServer().getPluginCommand("me").setExecutor(new YBMeCommand());

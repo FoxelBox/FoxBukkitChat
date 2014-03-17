@@ -1,5 +1,6 @@
 package de.doridian.yiffbukkit.chatcomponent;
 
+import de.doridian.yiffbukkit.chatcomponent.config.Configuration;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -11,11 +12,18 @@ import java.util.Map;
 import java.util.Set;
 
 public class RedisManager {
-	public static final JedisPool readJedisPool = createPool("mc.arcticfox.doridian.net");
-	private static final JedisPool[] writeJedisPools = new JedisPool[] { readJedisPool };
+	public static JedisPool readJedisPool;
+	public static JedisPool[] writeJedisPools;
 
-	private static final String REDIS_PASSWORD = "SECRET";
-	private static final int REDIS_DB = 3;
+	private static String REDIS_PASSWORD;
+	private static int REDIS_DB;
+
+	public static void initialize() {
+		REDIS_PASSWORD = Configuration.getValue("redis-pw", "");
+		REDIS_DB = Integer.parseInt(Configuration.getValue("redis-db", "1"));
+		readJedisPool = createPool(Configuration.getValue("redis-host", ""));
+		writeJedisPools = new JedisPool[] { readJedisPool };
+	}
 
 	private static JedisPool createPool(String host) {
 		return new JedisPool(new JedisPoolConfig(), host, 6379, 20000, REDIS_PASSWORD, REDIS_DB);

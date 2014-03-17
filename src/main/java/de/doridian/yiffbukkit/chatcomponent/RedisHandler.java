@@ -1,5 +1,6 @@
 package de.doridian.yiffbukkit.chatcomponent;
 
+import de.doridian.yiffbukkit.chatcomponent.config.Configuration;
 import org.bukkit.entity.Player;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
