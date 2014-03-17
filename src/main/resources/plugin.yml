@@ -1,0 +1,7 @@
+name: YiffBukkitChatComponent
+main: de.doridian.yiffbukkit.chatcomponent.YBChatComponent
+version: 1.0.0
+commands:
+    me:
+        description: Well, /me
+        usage: /<command> ACTION HERE
