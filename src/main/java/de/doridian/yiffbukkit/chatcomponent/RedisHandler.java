@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.UUID;
+
 public class RedisHandler extends JedisPubSub implements Runnable {
 	@Override
 	public void run() {
@@ -15,7 +17,7 @@ public class RedisHandler extends JedisPubSub implements Runnable {
 		if(player == null || message == null)
 			throw new NullPointerException();
 		final Jedis jedis = RedisManager.readJedisPool.getResource();
-		jedis.publish("yiffbukkit:from_server", Configuration.getValue("server-name", "Main") + "|" + player.getName() + "|" + message);
+		jedis.publish("yiffbukkit:from_server", Configuration.getValue("server-name", "Main") + "|" + player.getUniqueId() + "|" + player.getName() + "|" + message);
 		RedisManager.readJedisPool.returnResource(jedis);
 	}
 
@@ -26,13 +28,15 @@ public class RedisHandler extends JedisPubSub implements Runnable {
 	@Override
 	public void onMessage(final String channel, final String c_message) {
 		try {
-			final String[] split = c_message.split("\\|", 3);
+			final String[] split = c_message.split("\\|", 4);
 
-			// SERVER\0 USER\0 message
+			// SERVER\0 UUID\0 USER\0 message
 			final String server = split[0];
 			@SuppressWarnings("UnusedDeclaration")
-			final String userName = split[1];
-			String format = split[2];
+			final UUID userUUID = UUID.fromString(split[1]);
+			@SuppressWarnings("UnusedDeclaration")
+			final String userName = split[2];
+			String format = split[3];
 
 			if (!server.equals(Configuration.getValue("server-name", "Main"))) {
 				format = "\u00a72[" + server + "]\u00a7f " + format;
