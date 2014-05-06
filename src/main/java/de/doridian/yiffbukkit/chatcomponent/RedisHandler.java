@@ -17,7 +17,7 @@ public class RedisHandler extends JedisPubSub implements Runnable {
 		if(player == null || message == null)
 			throw new NullPointerException();
 		final Jedis jedis = RedisManager.readJedisPool.getResource();
-		jedis.publish("yiffbukkit:from_server", Configuration.getValue("server-name", "Main") + "|" + player.getUniqueId() + "|" + player.getName() + "|" + message);
+		jedis.publish("yiffbukkit:from_server", Configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
 		RedisManager.readJedisPool.returnResource(jedis);
 	}
 

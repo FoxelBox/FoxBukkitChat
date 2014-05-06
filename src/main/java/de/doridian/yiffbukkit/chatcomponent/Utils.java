@@ -1,12 +1,19 @@
 package de.doridian.yiffbukkit.chatcomponent;
 
+import org.bukkit.entity.Player;
+
 import java.util.Collection;
+import java.util.UUID;
 
 @SuppressWarnings("UnusedDeclaration")
 public class Utils {
 	public static String concat(Collection<String> parts, int start, String defaultText) {
 		// TODO: optimize
 		return concatArray(parts.toArray(new String[parts.size()]), start, defaultText);
+	}
+
+	public static UUID getPlayerUUID(Player player) {
+		return FishBansResolver.getUUID(player.getName());
 	}
 
 	public static String concatArray(String[] array, int start, String defaultText) {
