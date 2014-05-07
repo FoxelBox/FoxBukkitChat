@@ -10,7 +10,14 @@ import java.util.UUID;
 public class RedisHandler extends JedisPubSub implements Runnable {
 	@Override
 	public void run() {
-		RedisManager.readJedisPool.getResource().subscribe(this, "yiffbukkit:to_server");
+		while(true) {
+			try {
+				Thread.sleep(1000);
+				RedisManager.readJedisPool.getResource().subscribe(this, "yiffbukkit:to_server");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static void sendMessage(final Player player, final String  message) {
