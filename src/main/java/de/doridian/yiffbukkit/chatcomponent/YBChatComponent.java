@@ -1,5 +1,7 @@
 package de.doridian.yiffbukkit.chatcomponent;
 
+import de.doridian.dependencies.config.Configuration;
+import de.doridian.dependencies.redis.RedisManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,12 +22,15 @@ public class YBChatComponent extends JavaPlugin {
 		instance = this;
 	}
 
+    public Configuration configuration;
+
 	@Override
 	public void onEnable() {
 		super.onEnable();
         getDataFolder().mkdirs();
-		RedisManager.initialize();
-		RedisHandler.initialize();
+        configuration = new Configuration(getDataFolder());
+		RedisManager.initialize(configuration);
+
 		getServer().getPluginManager().registerEvents(new YBChatListener(), this);
 		getServer().getPluginCommand("me").setExecutor(new YBMeCommand());
 	}

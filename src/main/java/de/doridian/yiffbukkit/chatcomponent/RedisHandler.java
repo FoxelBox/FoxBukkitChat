@@ -1,39 +1,24 @@
 package de.doridian.yiffbukkit.chatcomponent;
 
-import de.doridian.yiffbukkit.chatcomponent.config.Configuration;
+import de.doridian.dependencies.redis.AbstractRedisHandler;
+import de.doridian.dependencies.redis.RedisManager;
 import org.bukkit.entity.Player;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPubSub;
 
 import java.util.UUID;
 
-public class RedisHandler extends JedisPubSub implements Runnable {
-	@Override
-	public void run() {
-        while(true) {
-            try {
-                Thread.sleep(1000);
-                RedisManager.subscribe("yiffbukkit:to_server", this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-	}
+public class RedisHandler extends AbstractRedisHandler {
+    public RedisHandler() {
+        super("yiffbukkit:to_server");
+    }
 
-	public static void sendMessage(final Player player, final String  message) {
+    public static void sendMessage(final Player player, final String  message) {
 		if(player == null || message == null)
 			throw new NullPointerException();
-        RedisManager.publish("yiffbukkit:from_server", Configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
-	}
-
-	public static void initialize() {
-		Thread t = new Thread(new RedisHandler());
-		t.setDaemon(true);
-		t.start();
+        RedisManager.publish("yiffbukkit:from_server", YBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
 	}
 
 	@Override
-	public void onMessage(final String channel, final String c_message) {
+	public void onMessage(final String c_message) {
 		try {
 			final String[] split = c_message.split("\\|", 4);
 
@@ -45,7 +30,7 @@ public class RedisHandler extends JedisPubSub implements Runnable {
 			final String userName = split[2];
 			String format = split[3];
 
-			if (!server.equals(Configuration.getValue("server-name", "Main"))) {
+			if (!server.equals(YBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
 				format = "\u00a72[" + server + "]\u00a7f " + format;
 			}
 
@@ -54,30 +39,5 @@ public class RedisHandler extends JedisPubSub implements Runnable {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void onPMessage(String s, String s2, String s3) {
-
-	}
-
-	@Override
-	public void onSubscribe(String s, int i) {
-
-	}
-
-	@Override
-	public void onUnsubscribe(String s, int i) {
-
-	}
-
-	@Override
-	public void onPUnsubscribe(String s, int i) {
-
-	}
-
-	@Override
-	public void onPSubscribe(String s, int i) {
-
 	}
 }
