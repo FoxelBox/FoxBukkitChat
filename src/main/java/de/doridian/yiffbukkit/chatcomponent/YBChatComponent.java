@@ -30,6 +30,7 @@ public class YBChatComponent extends JavaPlugin {
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
 		RedisManager.initialize(configuration);
+        new RedisHandler();
 
 		getServer().getPluginManager().registerEvents(new YBChatListener(), this);
 		getServer().getPluginCommand("me").setExecutor(new YBMeCommand());
