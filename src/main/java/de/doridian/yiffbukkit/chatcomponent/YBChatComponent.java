@@ -33,17 +33,18 @@ public class YBChatComponent extends JavaPlugin {
         new RedisHandler();
 
 		getServer().getPluginManager().registerEvents(new YBChatListener(), this);
-		getServer().getPluginCommand("me").setExecutor(new YBMeCommand());
+		getServer().getPluginCommand("me").setExecutor(new YBForwardedCommand());
+		getServer().getPluginCommand("pm").setExecutor(new YBForwardedCommand());
+		getServer().getPluginCommand("conv").setExecutor(new YBForwardedCommand());
 
         PlayerHelper.refreshPlayerListRedis();
 	}
 
-	class YBMeCommand implements CommandExecutor {
+	class YBForwardedCommand implements CommandExecutor {
 		@Override
 		public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-			String msg = Utils.concatArray(strings, 0, "");
-			if(!msg.isEmpty() && commandSender instanceof Player) {
-				RedisHandler.sendMessage((Player)commandSender, "/me " + Utils.concatArray(strings, 0, ""));
+			if(commandSender instanceof Player) {
+				RedisHandler.sendMessage((Player)commandSender, "/" + s + " " + Utils.concatArray(strings, 0, ""));
 				return true;
 			}
 			return false;

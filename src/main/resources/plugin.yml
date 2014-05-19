@@ -5,3 +5,11 @@ commands:
     me:
         description: Well, /me
         usage: /<command> ACTION HERE
+        aliases: emote
+    pm:
+        description: Like /tell
+        usage: /<command> [target] MESSAGE HERE
+        aliases: [tell, msg]
+    conv:
+        description: Opens conversation with target
+        usage: /<command> [target]
