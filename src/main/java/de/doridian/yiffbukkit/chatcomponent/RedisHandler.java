@@ -13,13 +13,13 @@ import java.util.UUID;
 
 public class RedisHandler extends AbstractRedisHandler {
     public RedisHandler() {
-        super("yiffbukkit:to_server");
+        super(YBChatComponent.instance.redisManager, "yiffbukkit:to_server");
     }
 
     public static void sendMessage(final Player player, final String  message) {
 		if(player == null || message == null)
 			throw new NullPointerException();
-        RedisManager.publish("yiffbukkit:from_server", YBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
+        YBChatComponent.instance.redisManager.publish("yiffbukkit:from_server", YBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
 	}
 
     private final Gson gson = new Gson();

@@ -24,12 +24,14 @@ public class YBChatComponent extends JavaPlugin {
 
     public Configuration configuration;
 
+    public RedisManager redisManager;
+
 	@Override
 	public void onEnable() {
 		super.onEnable();
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
-		RedisManager.initialize(configuration);
+		redisManager = new RedisManager(configuration);
         new RedisHandler();
 
 		getServer().getPluginManager().registerEvents(new YBChatListener(), this);
