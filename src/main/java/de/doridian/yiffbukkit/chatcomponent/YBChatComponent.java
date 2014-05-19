@@ -34,6 +34,8 @@ public class YBChatComponent extends JavaPlugin {
 
 		getServer().getPluginManager().registerEvents(new YBChatListener(), this);
 		getServer().getPluginCommand("me").setExecutor(new YBMeCommand());
+
+        PlayerHelper.refreshPlayerListRedis();
 	}
 
 	class YBMeCommand implements CommandExecutor {
