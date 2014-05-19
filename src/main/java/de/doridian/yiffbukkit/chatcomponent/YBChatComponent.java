@@ -59,20 +59,22 @@ public class YBChatComponent extends JavaPlugin {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onPlayerJoin(PlayerJoinEvent event) {
+            PlayerHelper.refreshUUID(event.getPlayer());
+            PlayerHelper.refreshPlayerListRedis();
 			event.setJoinMessage(null);
 			RedisHandler.sendMessage(event.getPlayer(), "\u0123join");
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onPlayerQuit(PlayerQuitEvent event) {
+            PlayerHelper.refreshPlayerListRedis();
 			event.setQuitMessage(null);
 			RedisHandler.sendMessage(event.getPlayer(), "\u0123quit");
 		}
 
-		@EventHandler(priority = EventPriority.HIGHEST)
+		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onPlayerKick(PlayerKickEvent event) {
-			if(event.isCancelled())
-				return;
+            PlayerHelper.refreshPlayerListRedis();
 			event.setLeaveMessage(null);
 			RedisHandler.sendMessage(event.getPlayer(), "\u0123kick " + event.getReason());
 		}
