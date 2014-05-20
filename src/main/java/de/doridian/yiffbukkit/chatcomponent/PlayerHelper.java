@@ -9,8 +9,8 @@ public class PlayerHelper {
     public static Map<String,String> playerNameToUUID = YBChatComponent.instance.redisManager.createCachedRedisMap("playerNameToUUID");
     public static Map<String,String> playerUUIDToName = YBChatComponent.instance.redisManager.createCachedRedisMap("playerUUIDToName");
     public static void refreshUUID(Player player) {
-        playerUUIDToName.put(player.getUniqueId().toString(), player.getName());
-        playerNameToUUID.put(player.getName().toLowerCase(), player.getUniqueId().toString());
+        playerUUIDToName.put(Utils.getPlayerUUID(player).toString(), player.getName());
+        playerNameToUUID.put(player.getName().toLowerCase(), Utils.getPlayerUUID(player).toString());
     }
 
     public static void refreshPlayerListRedis() {
@@ -18,7 +18,7 @@ public class PlayerHelper {
         final String keyName = "playersOnline:" + YBChatComponent.instance.configuration.getValue("server-name", "Main");
         YBChatComponent.instance.redisManager.del(keyName);
         for(Player ply : players) {
-            YBChatComponent.instance.redisManager.lpush(keyName, ply.getUniqueId().toString());
+            YBChatComponent.instance.redisManager.lpush(keyName, Utils.getPlayerUUID(ply).toString());
         }
     }
 }

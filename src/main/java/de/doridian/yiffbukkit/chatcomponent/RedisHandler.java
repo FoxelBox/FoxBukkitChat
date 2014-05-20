@@ -51,7 +51,7 @@ public class RedisHandler extends AbstractRedisHandler {
                 case "player":
                     for(String playerUUID : chatMessage.to.filter)
                         for (Player player : allPlayers)
-                            if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
+                            if (Utils.getPlayerUUID(player).equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
                                 targetPlayers.add(player);
                     break;
             }

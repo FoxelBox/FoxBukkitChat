@@ -12,7 +12,16 @@ public class Utils {
 		return concatArray(parts.toArray(new String[parts.size()]), start, defaultText);
 	}
 
-	public static UUID getPlayerUUID(Player player) {
+    public static UUID getPlayerUUID(Player player) {
+        return getPlayerUUID(player, true);
+    }
+
+	public static UUID getPlayerUUID(Player player, boolean mayUseRedis) {
+        if(mayUseRedis) {
+            String uuid = PlayerHelper.playerNameToUUID.get(player.getName().toLowerCase());
+            if (uuid != null)
+                return UUID.fromString(uuid);
+        }
 		return FishBansResolver.getUUID(player.getName());
 	}
 
