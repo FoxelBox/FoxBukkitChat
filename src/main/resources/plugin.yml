@@ -13,3 +13,7 @@ commands:
     conv:
         description: Opens conversation with target
         usage: /<command> [target]
+    list:
+        description: Lists all online players
+        usage: /<command>
+        aliases: who

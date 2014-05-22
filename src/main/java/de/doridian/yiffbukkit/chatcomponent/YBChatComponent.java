@@ -54,6 +54,7 @@ public class YBChatComponent extends JavaPlugin {
 		getServer().getPluginCommand("me").setExecutor(new YBForwardedCommand());
 		getServer().getPluginCommand("pm").setExecutor(new YBForwardedCommand());
 		getServer().getPluginCommand("conv").setExecutor(new YBForwardedCommand());
+		getServer().getPluginCommand("list").setExecutor(new YBForwardedCommand());
 
         PlayerHelper.refreshPlayerListRedis();
 	}
