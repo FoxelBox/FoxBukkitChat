@@ -56,7 +56,7 @@ public class YBChatComponent extends JavaPlugin {
 		getServer().getPluginCommand("conv").setExecutor(new YBForwardedCommand());
 		getServer().getPluginCommand("list").setExecutor(new YBForwardedCommand());
 
-        PlayerHelper.refreshPlayerListRedis();
+        PlayerHelper.refreshPlayerListRedis(null);
 	}
 
 	class YBForwardedCommand implements CommandExecutor {
@@ -82,21 +82,21 @@ public class YBChatComponent extends JavaPlugin {
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onPlayerJoin(PlayerJoinEvent event) {
             PlayerHelper.refreshUUID(event.getPlayer());
-            PlayerHelper.refreshPlayerListRedis();
+            PlayerHelper.refreshPlayerListRedis(null);
 			event.setJoinMessage(null);
 			RedisHandler.sendMessage(event.getPlayer(), "\u0123join");
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onPlayerQuit(PlayerQuitEvent event) {
-            PlayerHelper.refreshPlayerListRedis();
+            PlayerHelper.refreshPlayerListRedis(event.getPlayer());
 			event.setQuitMessage(null);
 			RedisHandler.sendMessage(event.getPlayer(), "\u0123quit");
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onPlayerKick(PlayerKickEvent event) {
-            PlayerHelper.refreshPlayerListRedis();
+            PlayerHelper.refreshPlayerListRedis(event.getPlayer());
 			event.setLeaveMessage(null);
 			RedisHandler.sendMessage(event.getPlayer(), "\u0123kick " + event.getReason());
 		}
