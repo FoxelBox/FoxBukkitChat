@@ -104,7 +104,7 @@
         </dependency>
         <dependency>
 			<groupId>org.bukkit</groupId>
-			<artifactId>craftbukkit</artifactId>
+			<artifactId>bukkit</artifactId>
 			<version>1.6.4-R2.0</version>
 			<scope>provided</scope>
 		</dependency>
