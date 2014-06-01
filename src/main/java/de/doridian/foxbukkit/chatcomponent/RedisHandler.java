@@ -1,25 +1,24 @@
 /**
- * This file is part of YiffBukkitChatComponent.
+ * This file is part of FoxBukkitChatComponent.
  *
- * YiffBukkitChatComponent is free software: you can redistribute it and/or modify
+ * FoxBukkitChatComponent is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * YiffBukkitChatComponent is distributed in the hope that it will be useful,
+ * FoxBukkitChatComponent is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with YiffBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.doridian.yiffbukkit.chatcomponent;
+package de.doridian.foxbukkit.chatcomponent;
 
 import com.google.gson.Gson;
 import de.doridian.dependencies.redis.AbstractRedisHandler;
-import de.doridian.dependencies.redis.RedisManager;
-import de.doridian.yiffbukkit.chatcomponent.json.ChatMessage;
+import de.doridian.foxbukkit.chatcomponent.json.ChatMessage;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -29,13 +28,13 @@ import java.util.UUID;
 
 public class RedisHandler extends AbstractRedisHandler {
     public RedisHandler() {
-        super(YBChatComponent.instance.redisManager, "yiffbukkit:to_server");
+        super(FBChatComponent.instance.redisManager, "yiffbukkit:to_server");
     }
 
     public static void sendMessage(final Player player, final String  message) {
 		if(player == null || message == null)
 			throw new NullPointerException();
-        YBChatComponent.instance.redisManager.publish("yiffbukkit:from_server", YBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
+        FBChatComponent.instance.redisManager.publish("yiffbukkit:from_server", FBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
 	}
 
     private final Gson gson = new Gson();
@@ -48,11 +47,11 @@ public class RedisHandler extends AbstractRedisHandler {
                 chatMessage = gson.fromJson(c_message, ChatMessage.class);
             }
 
-            if (!chatMessage.server.equals(YBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
+            if (!chatMessage.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
                 chatMessage.contents.plain = "\u00a72[" + chatMessage.server + "]\u00a7f " + chatMessage.contents.plain;
             }
 
-            List<Player> allPlayers = Arrays.asList(YBChatComponent.instance.getServer().getOnlinePlayers());
+            List<Player> allPlayers = Arrays.asList(FBChatComponent.instance.getServer().getOnlinePlayers());
             List<Player> targetPlayers = new ArrayList<>();
             switch(chatMessage.to.type) {
                 case "all":
