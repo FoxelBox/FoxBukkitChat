@@ -50,16 +50,16 @@ public class FBChatComponent extends JavaPlugin {
 		redisManager = new RedisManager(configuration);
         new RedisHandler();
 
-		getServer().getPluginManager().registerEvents(new YBChatListener(), this);
-		getServer().getPluginCommand("me").setExecutor(new YBForwardedCommand());
-		getServer().getPluginCommand("pm").setExecutor(new YBForwardedCommand());
-		getServer().getPluginCommand("conv").setExecutor(new YBForwardedCommand());
-		getServer().getPluginCommand("list").setExecutor(new YBForwardedCommand());
+		getServer().getPluginManager().registerEvents(new FBChatListener(), this);
+		getServer().getPluginCommand("me").setExecutor(new FBForwardedCommand());
+		getServer().getPluginCommand("pm").setExecutor(new FBForwardedCommand());
+		getServer().getPluginCommand("conv").setExecutor(new FBForwardedCommand());
+		getServer().getPluginCommand("list").setExecutor(new FBForwardedCommand());
 
         PlayerHelper.refreshPlayerListRedis(null);
 	}
 
-	class YBForwardedCommand implements CommandExecutor {
+	class FBForwardedCommand implements CommandExecutor {
 		@Override
 		public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
 			if(commandSender instanceof Player) {
@@ -70,7 +70,7 @@ public class FBChatComponent extends JavaPlugin {
 		}
 	}
 
-	class YBChatListener implements Listener {
+	class FBChatListener implements Listener {
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onPlayerChat(AsyncPlayerChatEvent event) {
 			if(event.isCancelled())

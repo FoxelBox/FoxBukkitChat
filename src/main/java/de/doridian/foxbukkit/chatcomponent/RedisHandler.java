@@ -28,13 +28,13 @@ import java.util.UUID;
 
 public class RedisHandler extends AbstractRedisHandler {
     public RedisHandler() {
-        super(FBChatComponent.instance.redisManager, "yiffbukkit:to_server");
+        super(FBChatComponent.instance.redisManager, "foxbukkit:to_server");
     }
 
     public static void sendMessage(final Player player, final String  message) {
 		if(player == null || message == null)
 			throw new NullPointerException();
-        FBChatComponent.instance.redisManager.publish("yiffbukkit:from_server", FBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
+        FBChatComponent.instance.redisManager.publish("foxbukkit:from_server", FBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
 	}
 
     private final Gson gson = new Gson();
