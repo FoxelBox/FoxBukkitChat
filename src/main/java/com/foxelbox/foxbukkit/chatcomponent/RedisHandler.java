@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.doridian.foxbukkit.chatcomponent;
+package com.foxelbox.foxbukkit.chatcomponent;
 
 import com.google.gson.Gson;
-import de.doridian.dependencies.redis.AbstractRedisHandler;
-import de.doridian.foxbukkit.chatcomponent.json.ChatMessage;
+import com.foxelbox.dependencies.redis.AbstractRedisHandler;
+import com.foxelbox.foxbukkit.chatcomponent.json.ChatMessage;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;

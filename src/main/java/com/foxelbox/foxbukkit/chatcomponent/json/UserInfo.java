@@ -14,18 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.doridian.foxbukkit.chatcomponent.json;
+package com.foxelbox.foxbukkit.chatcomponent.json;
 
-public class ChatMessage {
-    public ChatMessage(String server, UserInfo from, String plain) {
-        this.server = server;
-        this.from = from;
-        this.to = new MessageTarget("all", null);
-        this.contents = new MessageContents(plain);
+import java.util.UUID;
+
+public class UserInfo {
+    public UserInfo(UUID uuid, String name) {
+        this.uuid = uuid;
+        this.name = name;
     }
 
-    public String server;
-    public UserInfo from;
-    public MessageTarget to;
-    public MessageContents contents;
+    public UUID uuid;
+    public String name;
 }

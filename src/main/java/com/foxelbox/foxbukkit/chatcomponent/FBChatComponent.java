@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.doridian.foxbukkit.chatcomponent;
+package com.foxelbox.foxbukkit.chatcomponent;
 
-import de.doridian.dependencies.config.Configuration;
-import de.doridian.dependencies.redis.RedisManager;
+import com.foxelbox.dependencies.config.Configuration;
+import com.foxelbox.dependencies.redis.RedisManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

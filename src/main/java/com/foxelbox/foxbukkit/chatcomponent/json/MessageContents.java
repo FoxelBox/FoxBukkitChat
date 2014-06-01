@@ -14,14 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.doridian.foxbukkit.chatcomponent.json;
+package com.foxelbox.foxbukkit.chatcomponent.json;
 
-public class MessageTarget {
-    public MessageTarget(String type, String[] filter) {
-        this.type = type;
-        this.filter = filter;
+public class MessageContents {
+    public MessageContents(String plain, String formatXML, String[] formatXMLArgs) {
+        this.plain = plain;
+        this.xml_format = formatXML;
+        this.xml_format_args = formatXMLArgs;
     }
 
-    public String type;
-    public String[] filter;
+    public MessageContents(String plain) {
+        this.plain = plain;
+    }
+
+    public String plain;
+    public String xml_format;
+    public String[] xml_format_args;
 }

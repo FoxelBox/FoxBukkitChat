@@ -1,5 +1,5 @@
 name: FoxBukkitChatComponent
-main: de.doridian.foxbukkit.chatcomponent.FBChatComponent
+main: com.foxelbox.foxbukkit.chatcomponent.FBChatComponent
 version: 1.0.0
 commands:
     me:
