@@ -76,11 +76,14 @@ public class FBChatComponent extends JavaPlugin {
 			if(event.isCancelled())
 				return;
 			event.setCancelled(true);
-            final String msg = event.getMessage();
+            String msg = event.getMessage();
             if(msg.charAt(0) == '#')
                 RedisHandler.sendMessage(event.getPlayer(), "/opchat " + msg.substring(1));
-            else
-			    RedisHandler.sendMessage(event.getPlayer(), msg);
+            else {
+                if(msg.charAt(0) == '\u0123')
+                    msg = msg.substring(1);
+                RedisHandler.sendMessage(event.getPlayer(), msg);
+            }
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST)
