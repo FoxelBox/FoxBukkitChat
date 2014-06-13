@@ -25,11 +25,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashSet;
+import java.util.List;
 
 public class FBChatComponent extends JavaPlugin {
 	public static FBChatComponent instance;
@@ -42,6 +42,16 @@ public class FBChatComponent extends JavaPlugin {
 
     public RedisManager redisManager;
 
+    private final HashSet<String> redisCommands = new HashSet<>();
+    public void loadRedisCommands() {
+        List<String> commands = redisManager.lrange("chatLinkCommands", 0, -1);
+        synchronized (redisCommands) {
+            redisCommands.clear();
+            for (String str : commands)
+                redisCommands.add(str);
+        }
+    }
+
 	@Override
 	public void onEnable() {
 		super.onEnable();
@@ -50,40 +60,42 @@ public class FBChatComponent extends JavaPlugin {
 		redisManager = new RedisManager(configuration);
         new RedisHandler();
 
+        loadRedisCommands();
+
 		getServer().getPluginManager().registerEvents(new FBChatListener(), this);
-		getServer().getPluginCommand("me").setExecutor(new FBForwardedCommand());
-		getServer().getPluginCommand("pm").setExecutor(new FBForwardedCommand());
-		getServer().getPluginCommand("conv").setExecutor(new FBForwardedCommand());
-		getServer().getPluginCommand("list").setExecutor(new FBForwardedCommand());
 
         PlayerHelper.refreshPlayerListRedis(null);
 	}
 
-	class FBForwardedCommand implements CommandExecutor {
-		@Override
-		public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-			if(commandSender instanceof Player) {
-				RedisHandler.sendMessage((Player)commandSender, "/" + s + " " + Utils.concatArray(strings, 0, ""));
-				return true;
-			}
-			return false;
-		}
-	}
-
 	class FBChatListener implements Listener {
-		@EventHandler(priority = EventPriority.HIGHEST)
+        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+            final Player ply = event.getPlayer();
+            final String baseCmd = event.getMessage().substring(1).trim();
+
+            int posSpace = baseCmd.indexOf(' ');
+            String cmd; String argStr;
+            if (posSpace < 0) {
+                cmd = baseCmd.toLowerCase();
+                argStr = "";
+            } else {
+                cmd = baseCmd.substring(0, posSpace).trim().toLowerCase();
+                argStr = baseCmd.substring(posSpace).trim();
+            }
+
+            if(redisCommands.contains(cmd)) {
+                event.setCancelled(true);
+                RedisHandler.sendMessage(ply, "/" + cmd + " " + argStr);
+            }
+        }
+
+		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onPlayerChat(AsyncPlayerChatEvent event) {
-			if(event.isCancelled())
-				return;
 			event.setCancelled(true);
             String msg = event.getMessage();
-            if(msg.charAt(0) == '#')
-                RedisHandler.sendMessage(event.getPlayer(), "/opchat " + msg.substring(1));
-            else {
-                if(msg.charAt(0) == '\u0123')
-                    msg = msg.substring(1);
-                RedisHandler.sendMessage(event.getPlayer(), msg);
-            }
+            if(msg.charAt(0) == '\u0123')
+                msg = msg.substring(1);
+            RedisHandler.sendMessage(event.getPlayer(), msg);
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST)
