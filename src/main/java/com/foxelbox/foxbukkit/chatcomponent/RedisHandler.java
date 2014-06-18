@@ -16,9 +16,11 @@
  */
 package com.foxelbox.foxbukkit.chatcomponent;
 
+import com.foxelbox.foxbukkit.chatcomponent.json.ChatMessageIn;
+import com.foxelbox.foxbukkit.chatcomponent.json.ChatMessageOut;
 import com.google.gson.Gson;
 import com.foxelbox.dependencies.redis.AbstractRedisHandler;
-import com.foxelbox.foxbukkit.chatcomponent.json.ChatMessage;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -31,40 +33,53 @@ public class RedisHandler extends AbstractRedisHandler {
         super(FBChatComponent.instance.redisManager, "foxbukkit:to_server");
     }
 
-    public static void sendMessage(final Player player, final String  message) {
-		if(player == null || message == null)
-			throw new NullPointerException();
-        FBChatComponent.instance.redisManager.publish("foxbukkit:from_server", FBChatComponent.instance.configuration.getValue("server-name", "Main") + "|" + Utils.getPlayerUUID(player).toString() + "|" + player.getName() + "|" + message);
-	}
+    public static final UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("COMMANDSENDER:CONSOLE".getBytes());
 
-    private final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
+
+    public static void sendMessage(final CommandSender player, final String message) {
+        sendMessage(player, message, "text");
+    }
+
+    public static void sendMessage(final CommandSender player, final String message, final String type) {
+        if(player == null || message == null)
+            throw new NullPointerException();
+        ChatMessageIn messageIn = new ChatMessageIn(player);
+        messageIn.contents = message;
+        messageIn.type = type;
+        final String messageJSON;
+        synchronized (gson) {
+            messageJSON = gson.toJson(messageIn);
+        }
+        FBChatComponent.instance.redisManager.publish("foxbukkit:from_server", messageJSON);
+    }
 
 	@Override
 	public void onMessage(final String c_message) {
 		try {
-            final ChatMessage chatMessage;
+            final ChatMessageOut chatMessageOut;
             synchronized (gson) {
-                chatMessage = gson.fromJson(c_message, ChatMessage.class);
+                chatMessageOut = gson.fromJson(c_message, ChatMessageOut.class);
             }
 
-            if (!chatMessage.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
-                chatMessage.contents.plain = "\u00a72[" + chatMessage.server + "]\u00a7f " + chatMessage.contents.plain;
+            if (!chatMessageOut.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
+                chatMessageOut.contents.plain = "\u00a72[" + chatMessageOut.server + "]\u00a7f " + chatMessageOut.contents.plain;
             }
 
             List<Player> allPlayers = Arrays.asList(FBChatComponent.instance.getServer().getOnlinePlayers());
             List<Player> targetPlayers = new ArrayList<>();
-            switch(chatMessage.to.type) {
+            switch(chatMessageOut.to.type) {
                 case "all":
                     targetPlayers = allPlayers;
                     break;
                 case "permission":
-                    for(String permission : chatMessage.to.filter)
+                    for(String permission : chatMessageOut.to.filter)
                         for (Player player : allPlayers)
                             if (player.hasPermission(permission) && !targetPlayers.contains(player))
                                 targetPlayers.add(player);
                     break;
                 case "player":
-                    for(String playerUUID : chatMessage.to.filter)
+                    for(String playerUUID : chatMessageOut.to.filter)
                         for (Player player : allPlayers)
                             if (Utils.getPlayerUUID(player).equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
                                 targetPlayers.add(player);
@@ -72,7 +87,7 @@ public class RedisHandler extends AbstractRedisHandler {
             }
 
             for(Player targetPlayer : targetPlayers) {
-                targetPlayer.sendMessage(chatMessage.contents.plain);
+                targetPlayer.sendMessage(chatMessageOut.contents.plain);
             }
 		}
 		catch (Exception e) {

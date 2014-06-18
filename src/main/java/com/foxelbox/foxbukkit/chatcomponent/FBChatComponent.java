@@ -93,8 +93,6 @@ public class FBChatComponent extends JavaPlugin {
 		public void onPlayerChat(AsyncPlayerChatEvent event) {
 			event.setCancelled(true);
             String msg = event.getMessage();
-            if(msg.charAt(0) == '\u0123')
-                msg = msg.substring(1);
             RedisHandler.sendMessage(event.getPlayer(), msg);
 		}
 
@@ -103,21 +101,21 @@ public class FBChatComponent extends JavaPlugin {
             PlayerHelper.refreshUUID(event.getPlayer());
             PlayerHelper.refreshPlayerListRedis(null);
 			event.setJoinMessage(null);
-			RedisHandler.sendMessage(event.getPlayer(), "\u0123join");
+			RedisHandler.sendMessage(event.getPlayer(), "join", "playerstate");
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onPlayerQuit(PlayerQuitEvent event) {
             PlayerHelper.refreshPlayerListRedis(event.getPlayer());
 			event.setQuitMessage(null);
-			RedisHandler.sendMessage(event.getPlayer(), "\u0123quit");
+			RedisHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
 		}
 
 		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onPlayerKick(PlayerKickEvent event) {
             PlayerHelper.refreshPlayerListRedis(event.getPlayer());
 			event.setLeaveMessage(null);
-			RedisHandler.sendMessage(event.getPlayer(), "\u0123kick " + event.getReason());
+			RedisHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
 		}
 	}
 }
