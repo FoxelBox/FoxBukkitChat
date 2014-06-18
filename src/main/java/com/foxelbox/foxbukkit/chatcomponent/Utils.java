@@ -28,6 +28,16 @@ public class Utils {
 		return concatArray(parts.toArray(new String[parts.size()]), start, defaultText);
 	}
 
+    public static String XMLEscape(String s) {
+        s = s.replace("&", "&amp;");
+        s = s.replace("\"", "&quot;");
+        s = s.replace("'", "&apos;");
+        s = s.replace("<", "&lt;");
+        s = s.replace(">", "&gt;");
+
+        return s;
+    }
+
     public static UUID getPlayerUUID(Player player) {
         return getPlayerUUID(player, true);
     }
