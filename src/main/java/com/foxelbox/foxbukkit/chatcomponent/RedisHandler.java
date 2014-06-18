@@ -51,7 +51,7 @@ public class RedisHandler extends AbstractRedisHandler {
         synchronized (gson) {
             messageJSON = gson.toJson(messageIn);
         }
-        FBChatComponent.instance.redisManager.publish("foxbukkit:from_server", messageJSON);
+        FBChatComponent.instance.redisManager.lpush("foxbukkit:from_server", messageJSON);
     }
 
 	@Override
