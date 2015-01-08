@@ -16,6 +16,8 @@
  */
 package com.foxelbox.foxbukkit.chatcomponent;
 
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
@@ -26,6 +28,22 @@ public class Utils {
 	public static String concat(Collection<String> parts, int start, String defaultText) {
 		// TODO: optimize
 		return concatArray(parts.toArray(new String[parts.size()]), start, defaultText);
+	}
+
+	public static UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("[CONSOLE]".getBytes());
+
+	public static UUID getCommandSenderUUID(CommandSender commandSender) {
+		if(commandSender instanceof Player)
+			return ((Player) commandSender).getUniqueId();
+		if(commandSender instanceof ConsoleCommandSender)
+			return CONSOLE_UUID;
+		return UUID.nameUUIDFromBytes(("[CSUUID:" + commandSender.getClass().getName() + "]").getBytes());
+	}
+
+	public static String getCommandSenderDisplayName(CommandSender commandSender) {
+		if(commandSender instanceof Player)
+			return ((Player) commandSender).getDisplayName();
+		return commandSender.getName();
 	}
 
     public static String XMLEscape(String s) {

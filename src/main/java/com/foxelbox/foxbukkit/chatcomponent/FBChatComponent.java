@@ -18,6 +18,7 @@ package com.foxelbox.foxbukkit.chatcomponent;
 
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.RedisManager;
+import com.foxelbox.dependencies.threading.SimpleThreadCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -57,7 +58,7 @@ public class FBChatComponent extends JavaPlugin {
 		super.onEnable();
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
-		redisManager = new RedisManager(configuration);
+		redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
         new RedisHandler();
 
         loadRedisCommands();

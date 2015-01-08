@@ -16,6 +16,8 @@
  */
 package com.foxelbox.foxbukkit.chatcomponent;
 
+import net.minecraft.server.v1_7_R4.Packet;
+import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -37,5 +39,9 @@ public class PlayerHelper {
                 continue;
             FBChatComponent.instance.redisManager.lpush(keyName, Utils.getPlayerUUID(ply).toString());
         }
+    }
+
+    public static void sendPacketToPlayer(final Player ply, final Packet packet) {
+        ((CraftPlayer)ply).getHandle().playerConnection.sendPacket(packet);
     }
 }

@@ -14,14 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FoxBukkit.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.foxelbox.foxbukkit.chatcomponent.json;
+package com.foxelbox.foxbukkit.chatcomponent.html;
 
-public class MessageTarget {
-    public MessageTarget(String type, String[] filter) {
-        this.type = type;
-        this.filter = filter;
-    }
+import net.minecraft.server.v1_7_R4.ChatModifier;
 
-    public String type;
-    public String[] filter;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+public class S extends Element {
+	@Override
+	protected void modifyStyle(ChatModifier style) {
+		style.setStrikethrough(true);
+	}
 }
