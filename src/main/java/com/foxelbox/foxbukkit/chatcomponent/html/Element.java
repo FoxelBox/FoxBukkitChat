@@ -1,29 +1,23 @@
 /**
- * This file is part of FoxBukkit.
+ * This file is part of FoxBukkitChatComponent.
  *
- * FoxBukkit is free software: you can redistribute it and/or modify
+ * FoxBukkitChatComponent is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FoxBukkit is distributed in the hope that it will be useful,
+ * FoxBukkitChatComponent is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with FoxBukkit.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.foxelbox.foxbukkit.chatcomponent.html;
 
 import com.foxelbox.foxbukkit.chatcomponent.HTMLParser;
-import net.minecraft.server.v1_7_R4.ChatBaseComponent;
-import net.minecraft.server.v1_7_R4.ChatClickable;
-import net.minecraft.server.v1_7_R4.ChatHoverable;
-import net.minecraft.server.v1_7_R4.ChatModifier;
-import net.minecraft.server.v1_7_R4.EnumClickAction;
-import net.minecraft.server.v1_7_R4.EnumHoverAction;
-import net.minecraft.server.v1_7_R4.IChatBaseComponent;
+import net.minecraft.server.v1_7_R4.*;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAttribute;

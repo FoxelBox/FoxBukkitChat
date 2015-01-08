@@ -1,22 +1,21 @@
 /**
- * This file is part of FoxBukkit.
+ * This file is part of FoxBukkitChatComponent.
  *
- * FoxBukkit is free software: you can redistribute it and/or modify
+ * FoxBukkitChatComponent is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FoxBukkit is distributed in the hope that it will be useful,
+ * FoxBukkitChatComponent is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with FoxBukkit.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.foxelbox.foxbukkit.chatcomponent;
 
-import com.foxelbox.foxbukkit.chatcomponent.PlayerHelper;
 import com.foxelbox.foxbukkit.chatcomponent.html.Element;
 import net.minecraft.server.v1_7_R4.ChatBaseComponent;
 import net.minecraft.server.v1_7_R4.PacketPlayOutChat;
@@ -28,7 +27,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
