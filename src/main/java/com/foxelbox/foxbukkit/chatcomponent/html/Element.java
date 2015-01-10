@@ -124,11 +124,20 @@ public abstract class Element {
 		return condense(getNmsComponents(style, false));
 	}
 
-	private static final Field ChatBaseComponent_a;
+	private static final Field ChatBaseComponent_listChildren;
 	static {
 		try {
-			ChatBaseComponent_a = ChatBaseComponent.class.getField("a");
-			ChatBaseComponent_a.setAccessible(true);
+			Field _ChatBaseComponent_listChildren = null;
+			for(Field field : ChatBaseComponent.class.getDeclaredFields()) {
+				if(field.getType().equals(List.class)) {
+					_ChatBaseComponent_listChildren = field;
+					break;
+				}
+			}
+			if(_ChatBaseComponent_listChildren == null)
+				throw new Exception("Could not find listOfChildren field in ChatBaseComponent");
+			ChatBaseComponent_listChildren = _ChatBaseComponent_listChildren;
+			ChatBaseComponent_listChildren.setAccessible(true);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -145,7 +154,7 @@ public abstract class Element {
 
 		if (!components.isEmpty()) {
 			try {
-				ChatBaseComponent_a.set(head, components);
+				ChatBaseComponent_listChildren.set(head, components);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
