@@ -87,14 +87,15 @@ public class FBChatComponent extends JavaPlugin {
             }
         }
 
-		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+		@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 		public void onPlayerChat(AsyncPlayerChatEvent event) {
-			event.setCancelled(true);
-            String msg = event.getMessage();
-            RedisHandler.sendMessage(event.getPlayer(), msg);
+            event.setCancelled(true);
+            final String msg = event.getMessage();
+            final Player ply = event.getPlayer();
+            RedisHandler.sendMessage(ply, msg);
 		}
 
-		@EventHandler(priority = EventPriority.HIGHEST)
+		@EventHandler(priority = EventPriority.MONITOR)
 		public void onPlayerJoin(PlayerJoinEvent event) {
             PlayerHelper.refreshUUID(event.getPlayer());
             PlayerHelper.refreshPlayerListRedis(null);
@@ -102,14 +103,14 @@ public class FBChatComponent extends JavaPlugin {
 			RedisHandler.sendMessage(event.getPlayer(), "join", "playerstate");
 		}
 
-		@EventHandler(priority = EventPriority.HIGHEST)
+		@EventHandler(priority = EventPriority.MONITOR)
 		public void onPlayerQuit(PlayerQuitEvent event) {
             PlayerHelper.refreshPlayerListRedis(event.getPlayer());
 			event.setQuitMessage(null);
 			RedisHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
 		}
 
-		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+		@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 		public void onPlayerKick(PlayerKickEvent event) {
             PlayerHelper.refreshPlayerListRedis(event.getPlayer());
 			event.setLeaveMessage(null);
