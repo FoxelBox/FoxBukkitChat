@@ -22,15 +22,54 @@ import net.minecraft.server.v1_7_R4.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.xml.sax.*;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.UnmarshallerHandler;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
 public class HTMLParser {
+	static class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
+		private final UnmarshallerHandler uh;
+		public WhitespaceAwareUnmarshallerHandler( UnmarshallerHandler uh ) {
+			this.uh = uh;
+		}
+		/**
+		 * Replace all-whitespace character blocks with the character '\u000B',
+		 * which satisfies the following properties:
+		 *
+		 * 1. "\u000B".matches( "\\s" ) == true
+		 * 2. when parsing XmlMixed content, JAXB does not suppress the whitespace
+		 **/
+		public void characters(
+				char[] ch, int start, int length
+		) throws SAXException {
+			for ( int i = start + length - 1; i >= start; --i )
+				if ( !Character.isWhitespace( ch[ i ] ) ) {
+					uh.characters( ch, start, length );
+					return;
+				}
+			Arrays.fill( ch, start, start + length, '\u000B' );
+			uh.characters( ch, start, length );
+		}
+		/* what follows is just blind delegation monkey code */
+		public void ignorableWhitespace( char[] ch, int start, int length ) throws SAXException { uh.characters( ch, start, length ); }
+		public void endDocument() throws SAXException { uh.endDocument(); }
+		public void endElement( String uri, String localName, String name ) throws SAXException { uh.endElement( uri,  localName, name ); }
+		public void endPrefixMapping( String prefix ) throws SAXException { uh.endPrefixMapping( prefix ); }
+		public void processingInstruction( String target, String data ) throws SAXException { uh.processingInstruction(  target, data ); }
+		public void setDocumentLocator( Locator locator ) { uh.setDocumentLocator( locator ); }
+		public void skippedEntity( String name ) throws SAXException { uh.skippedEntity( name ); }
+		public void startDocument() throws SAXException { uh.startDocument(); }
+		public void startElement( String uri, String localName, String name, Attributes atts ) throws SAXException { uh.startElement( uri, localName, name, atts ); }
+		public void startPrefixMapping( String prefix, String uri ) throws SAXException { uh.startPrefixMapping( prefix, uri ); }
+	}
+
 	/*
 	 * ChatComponentText = TextComponent
 	 * ChatMessage = TranslatableComponent
@@ -49,17 +88,25 @@ public class HTMLParser {
         return out;
     }
 
-    public static ChatBaseComponent parse(String xmlSource) throws JAXBException {
+	@SuppressWarnings( "unchecked" )
+	private static <T> T unmarshal(JAXBContext ctx, String strData, boolean flgWhitespaceAware) throws Exception {
+		UnmarshallerHandler uh = ctx.createUnmarshaller().getUnmarshallerHandler();
+		XMLReader xr = XMLReaderFactory.createXMLReader();
+		xr.setContentHandler( flgWhitespaceAware ? new WhitespaceAwareUnmarshallerHandler( uh ) : uh );
+		xr.parse( new InputSource( new StringReader( strData ) ) );
+		return (T)uh.getResult();
+	}
+
+    public static ChatBaseComponent parse(String xmlSource) throws Exception {
 		xmlSource = "<span>" + xmlSource + "</span>";
 
 		final JAXBContext jaxbContext = JAXBContext.newInstance(Element.class);
-		final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-		final Element element = (Element) unmarshaller.unmarshal(new StringReader(xmlSource));
+		final Element element = unmarshal(jaxbContext, xmlSource, true);
 
 		return element.getDefaultNmsComponent();
 	}
 
-	public static ChatBaseComponent format(String format) throws JAXBException {
+	public static ChatBaseComponent format(String format) throws Exception {
 		return parse(format);
 	}
 
@@ -82,7 +129,7 @@ public class HTMLParser {
 
 			return true;
 		}
-		catch (JAXBException e) {
+		catch (Exception e) {
 			System.out.println("ERROR ON MESSAGE: " + format);
 			e.printStackTrace();
 			Bukkit.broadcastMessage("Error parsing XML");
@@ -96,7 +143,7 @@ public class HTMLParser {
 			PlayerHelper.sendPacketToPlayer(player, createChatPacket(format));
 
 			return true;
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			System.out.println("ERROR ON MESSAGE: " + format);
 			e.printStackTrace();
 			player.sendMessage("Error parsing XML");
@@ -117,7 +164,7 @@ public class HTMLParser {
 		return format; // TODO: strip XML tags
 	}
 
-	private static PacketPlayOutChat createChatPacket(String format) throws JAXBException {
+	private static PacketPlayOutChat createChatPacket(String format) throws Exception {
 		return new PacketPlayOutChat(format(format));
 	}
 

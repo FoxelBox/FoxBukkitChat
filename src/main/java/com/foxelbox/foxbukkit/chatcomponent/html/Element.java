@@ -55,7 +55,7 @@ public abstract class Element {
 	protected abstract void modifyStyle(ChatModifier style);
 
 	private static final Pattern FUNCTION_PATTERN = Pattern.compile("^([^(]+)\\('(.*)'\\)$");
-	public List<ChatBaseComponent> getNmsComponents(ChatModifier style, boolean condenseElements) throws JAXBException {
+	public List<ChatBaseComponent> getNmsComponents(ChatModifier style, boolean condenseElements) throws Exception {
 		modifyStyle(style);
 
 		if (onClick != null) {
@@ -95,7 +95,7 @@ public abstract class Element {
 			mixedContent.add(0, "");
 		for (Object o : mixedContent) {
 			if (o instanceof String) {
-				for (IChatBaseComponent baseComponent : CraftChatMessage.fromString((String)o, style.clone())) {
+				for (IChatBaseComponent baseComponent : CraftChatMessage.fromString(((String)o).replace('\u000B', ' '), style.clone())) {
 					components.add((ChatBaseComponent) baseComponent);
 				}
 			}
@@ -116,11 +116,11 @@ public abstract class Element {
 		return components;
 	}
 
-	public ChatBaseComponent getDefaultNmsComponent() throws JAXBException {
+	public ChatBaseComponent getDefaultNmsComponent() throws Exception {
 		return getNmsComponent(new ChatModifier());
 	}
 
-	public ChatBaseComponent getNmsComponent(ChatModifier style) throws JAXBException {
+	public ChatBaseComponent getNmsComponent(ChatModifier style) throws Exception {
 		return condense(getNmsComponents(style, false));
 	}
 
