@@ -29,5 +29,5 @@ public class ChatMessageOut {
 	public boolean finalize_context = false;
 	public String type = "text";
 
-	public MessageContents contents;
+	public String contents;
 }

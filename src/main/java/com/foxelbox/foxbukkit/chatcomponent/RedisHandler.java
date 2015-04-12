@@ -84,16 +84,14 @@ public class RedisHandler extends AbstractRedisHandler {
 				return;
 
 			if (!chatMessageOut.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
-				chatMessageOut.contents.plain = "\u00a72[" + chatMessageOut.server + "]\u00a7f " + chatMessageOut.contents.plain;
-				if(chatMessageOut.contents.xml != null)
-					chatMessageOut.contents.xml = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents.xml;
+				if(chatMessageOut.contents != null) {
+					chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
+				}
 			}
 
-			if(chatMessageOut.contents.xml != null)
-				HTMLParser.sendToPlayers(targetPlayers, chatMessageOut.contents.xml);
-			else
-				for(Player plyTarget : targetPlayers)
-					plyTarget.sendMessage(chatMessageOut.contents.plain);
+			if(chatMessageOut.contents != null) {
+				HTMLParser.sendToPlayers(targetPlayers, chatMessageOut.contents);
+			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
