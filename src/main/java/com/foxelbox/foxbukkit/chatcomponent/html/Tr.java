@@ -16,9 +16,9 @@
  */
 package com.foxelbox.foxbukkit.chatcomponent.html;
 
-import net.minecraft.server.v1_7_R4.ChatBaseComponent;
-import net.minecraft.server.v1_7_R4.ChatMessage;
-import net.minecraft.server.v1_7_R4.ChatModifier;
+import net.minecraft.server.v1_8_R3.ChatBaseComponent;
+import net.minecraft.server.v1_8_R3.ChatMessage;
+import net.minecraft.server.v1_8_R3.ChatModifier;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -28,20 +28,20 @@ import java.util.List;
 
 @XmlRootElement
 public class Tr extends Element {
-	@XmlAttribute(required = true)
-	private String key;
+    @XmlAttribute(required = true)
+    private String key;
 
-	@Override
-	protected void modifyStyle(ChatModifier style) {
-		// TODO: get rid of this
-	}
+    @Override
+    protected void modifyStyle(ChatModifier style) {
+        // TODO: get rid of this
+    }
 
-	@Override
-	public List<ChatBaseComponent> getNmsComponents(ChatModifier style, boolean condenseElements) throws Exception {
-		final List<ChatBaseComponent> components = super.getNmsComponents(style, true);
+    @Override
+    public List<ChatBaseComponent> getNmsComponents(ChatModifier style, boolean condenseElements) throws Exception {
+        final List<ChatBaseComponent> components = super.getNmsComponents(style, true);
 
-		final ChatBaseComponent translateComponent = new ChatMessage(key, components.toArray());
-		translateComponent.setChatModifier(style);
-		return Arrays.asList(translateComponent);
-	}
+        final ChatBaseComponent translateComponent = new ChatMessage(key, components.toArray());
+        translateComponent.setChatModifier(style);
+        return Arrays.asList(translateComponent);
+    }
 }

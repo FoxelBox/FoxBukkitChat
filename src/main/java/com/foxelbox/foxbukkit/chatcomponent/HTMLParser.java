@@ -17,8 +17,8 @@
 package com.foxelbox.foxbukkit.chatcomponent;
 
 import com.foxelbox.foxbukkit.chatcomponent.html.Element;
-import net.minecraft.server.v1_7_R4.ChatBaseComponent;
-import net.minecraft.server.v1_7_R4.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.ChatBaseComponent;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -31,53 +31,54 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.UnmarshallerHandler;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class HTMLParser {
-	static class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
-		private final UnmarshallerHandler uh;
-		public WhitespaceAwareUnmarshallerHandler( UnmarshallerHandler uh ) {
-			this.uh = uh;
-		}
-		/**
-		 * Replace all-whitespace character blocks with the character '\u000B',
-		 * which satisfies the following properties:
-		 *
-		 * 1. "\u000B".matches( "\\s" ) == true
-		 * 2. when parsing XmlMixed content, JAXB does not suppress the whitespace
-		 **/
-		public void characters(
-				char[] ch, int start, int length
-		) throws SAXException {
-			for ( int i = start + length - 1; i >= start; --i )
-				if ( !Character.isWhitespace( ch[ i ] ) ) {
-					uh.characters( ch, start, length );
-					return;
-				}
-			Arrays.fill( ch, start, start + length, '\u000B' );
-			uh.characters( ch, start, length );
-		}
-		/* what follows is just blind delegation monkey code */
-		public void ignorableWhitespace( char[] ch, int start, int length ) throws SAXException { uh.characters( ch, start, length ); }
-		public void endDocument() throws SAXException { uh.endDocument(); }
-		public void endElement( String uri, String localName, String name ) throws SAXException { uh.endElement( uri,  localName, name ); }
-		public void endPrefixMapping( String prefix ) throws SAXException { uh.endPrefixMapping( prefix ); }
-		public void processingInstruction( String target, String data ) throws SAXException { uh.processingInstruction(  target, data ); }
-		public void setDocumentLocator( Locator locator ) { uh.setDocumentLocator( locator ); }
-		public void skippedEntity( String name ) throws SAXException { uh.skippedEntity( name ); }
-		public void startDocument() throws SAXException { uh.startDocument(); }
-		public void startElement( String uri, String localName, String name, Attributes atts ) throws SAXException { uh.startElement( uri, localName, name, atts ); }
-		public void startPrefixMapping( String prefix, String uri ) throws SAXException { uh.startPrefixMapping( prefix, uri ); }
-	}
+    static class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
+        private final UnmarshallerHandler uh;
+        public WhitespaceAwareUnmarshallerHandler( UnmarshallerHandler uh ) {
+            this.uh = uh;
+        }
+        /**
+         * Replace all-whitespace character blocks with the character '\u000B',
+         * which satisfies the following properties:
+         *
+         * 1. "\u000B".matches( "\\s" ) == true
+         * 2. when parsing XmlMixed content, JAXB does not suppress the whitespace
+         **/
+        public void characters(
+                char[] ch, int start, int length
+        ) throws SAXException {
+            for ( int i = start + length - 1; i >= start; --i )
+                if ( !Character.isWhitespace( ch[ i ] ) ) {
+                    uh.characters( ch, start, length );
+                    return;
+                }
+            Arrays.fill( ch, start, start + length, '\u000B' );
+            uh.characters( ch, start, length );
+        }
+        /* what follows is just blind delegation monkey code */
+        public void ignorableWhitespace( char[] ch, int start, int length ) throws SAXException { uh.characters( ch, start, length ); }
+        public void endDocument() throws SAXException { uh.endDocument(); }
+        public void endElement( String uri, String localName, String name ) throws SAXException { uh.endElement( uri,  localName, name ); }
+        public void endPrefixMapping( String prefix ) throws SAXException { uh.endPrefixMapping( prefix ); }
+        public void processingInstruction( String target, String data ) throws SAXException { uh.processingInstruction(  target, data ); }
+        public void setDocumentLocator( Locator locator ) { uh.setDocumentLocator( locator ); }
+        public void skippedEntity( String name ) throws SAXException { uh.skippedEntity( name ); }
+        public void startDocument() throws SAXException { uh.startDocument(); }
+        public void startElement( String uri, String localName, String name, Attributes atts ) throws SAXException { uh.startElement( uri, localName, name, atts ); }
+        public void startPrefixMapping( String prefix, String uri ) throws SAXException { uh.startPrefixMapping( prefix, uri ); }
+    }
 
-	/*
-	 * ChatComponentText = TextComponent
-	 * ChatMessage = TranslatableComponent
-	 * ChatModifier = Style
-	 * ChatClickable = ClickEvent
-	 * ChatHoverable = HoverEvent
-	 */
-	public static String formatParams(String xmlSource, String... params) {
+    /*
+     * ChatComponentText = TextComponent
+     * ChatMessage = TranslatableComponent
+     * ChatModifier = Style
+     * ChatClickable = ClickEvent
+     * ChatHoverable = HoverEvent
+     */
+    public static String formatParams(String xmlSource, String... params) {
         return String.format(xmlSource, xmlEscapeArray(params));
     }
 
@@ -88,93 +89,93 @@ public class HTMLParser {
         return out;
     }
 
-	@SuppressWarnings( "unchecked" )
-	private static <T> T unmarshal(JAXBContext ctx, String strData, boolean flgWhitespaceAware) throws Exception {
-		UnmarshallerHandler uh = ctx.createUnmarshaller().getUnmarshallerHandler();
-		XMLReader xr = XMLReaderFactory.createXMLReader();
-		xr.setContentHandler( flgWhitespaceAware ? new WhitespaceAwareUnmarshallerHandler( uh ) : uh );
-		xr.parse( new InputSource( new StringReader( strData ) ) );
-		return (T)uh.getResult();
-	}
+    @SuppressWarnings( "unchecked" )
+    private static <T> T unmarshal(JAXBContext ctx, String strData, boolean flgWhitespaceAware) throws Exception {
+        UnmarshallerHandler uh = ctx.createUnmarshaller().getUnmarshallerHandler();
+        XMLReader xr = XMLReaderFactory.createXMLReader();
+        xr.setContentHandler( flgWhitespaceAware ? new WhitespaceAwareUnmarshallerHandler( uh ) : uh );
+        xr.parse( new InputSource( new StringReader( strData ) ) );
+        return (T)uh.getResult();
+    }
 
     public static ChatBaseComponent parse(String xmlSource) throws Exception {
-		xmlSource = "<span>" + xmlSource + "</span>";
+        xmlSource = "<span>" + xmlSource + "</span>";
 
-		final JAXBContext jaxbContext = JAXBContext.newInstance(Element.class);
-		final Element element = unmarshal(jaxbContext, xmlSource, true);
+        final JAXBContext jaxbContext = JAXBContext.newInstance(Element.class);
+        final Element element = unmarshal(jaxbContext, xmlSource, true);
 
-		return element.getDefaultNmsComponent();
-	}
+        return element.getDefaultNmsComponent();
+    }
 
-	public static ChatBaseComponent format(String format) throws Exception {
-		return parse(format);
-	}
+    public static ChatBaseComponent format(String format) throws Exception {
+        return parse(format);
+    }
 
-	public static boolean sendToAll(String format) {
-		return sendToPlayers(Arrays.asList(Bukkit.getOnlinePlayers()), format);
-	}
+    public static boolean sendToAll(String format) {
+        return sendToPlayers(Bukkit.getOnlinePlayers(), format);
+    }
 
-	public static boolean sendToPlayers(List<? extends CommandSender> targetPlayers, String format) {
-		try {
-			final PacketPlayOutChat packet = createChatPacket(format);
+    public static boolean sendToPlayers(Collection<? extends CommandSender> targetPlayers, String format) {
+        try {
+            final PacketPlayOutChat packet = createChatPacket(format);
 
-			for (CommandSender commandSender : targetPlayers) {
-				if (!(commandSender instanceof Player)) {
-					commandSender.sendMessage(parsePlain(format));
-					continue;
-				}
+            for (CommandSender commandSender : targetPlayers) {
+                if (!(commandSender instanceof Player)) {
+                    commandSender.sendMessage(parsePlain(format));
+                    continue;
+                }
 
-				PlayerHelper.sendPacketToPlayer((Player) commandSender, packet);
-			}
+                PlayerHelper.sendPacketToPlayer((Player) commandSender, packet);
+            }
 
-			return true;
-		}
-		catch (Exception e) {
-			System.out.println("ERROR ON MESSAGE: " + format);
-			e.printStackTrace();
-			Bukkit.broadcastMessage("Error parsing XML");
+            return true;
+        }
+        catch (Exception e) {
+            System.out.println("ERROR ON MESSAGE: " + format);
+            e.printStackTrace();
+            Bukkit.broadcastMessage("Error parsing XML");
 
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
-	public static boolean sendToPlayer(Player player, String format) {
-		try {
-			PlayerHelper.sendPacketToPlayer(player, createChatPacket(format));
+    public static boolean sendToPlayer(Player player, String format) {
+        try {
+            PlayerHelper.sendPacketToPlayer(player, createChatPacket(format));
 
-			return true;
-		} catch (Exception e) {
-			System.out.println("ERROR ON MESSAGE: " + format);
-			e.printStackTrace();
-			player.sendMessage("Error parsing XML");
+            return true;
+        } catch (Exception e) {
+            System.out.println("ERROR ON MESSAGE: " + format);
+            e.printStackTrace();
+            player.sendMessage("Error parsing XML");
 
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
-	public static boolean sendToPlayer(CommandSender commandSender, String format) {
-		if (commandSender instanceof Player)
-			return sendToPlayer((Player) commandSender, format);
+    public static boolean sendToPlayer(CommandSender commandSender, String format) {
+        if (commandSender instanceof Player)
+            return sendToPlayer((Player) commandSender, format);
 
-		commandSender.sendMessage(parsePlain(format));
-		return true;
-	}
+        commandSender.sendMessage(parsePlain(format));
+        return true;
+    }
 
-	private static String parsePlain(String format) {
-		return format; // TODO: strip XML tags
-	}
+    private static String parsePlain(String format) {
+        return format; // TODO: strip XML tags
+    }
 
-	private static PacketPlayOutChat createChatPacket(String format) throws Exception {
-		return new PacketPlayOutChat(format(format));
-	}
+    private static PacketPlayOutChat createChatPacket(String format) throws Exception {
+        return new PacketPlayOutChat(format(format));
+    }
 
-	public static String escape(String s) {
-		s = s.replace("&", "&amp;");
-		s = s.replace("\"", "&quot;");
-		s = s.replace("'", "&apos;");
-		s = s.replace("<", "&lt;");
-		s = s.replace(">", "&gt;");
+    public static String escape(String s) {
+        s = s.replace("&", "&amp;");
+        s = s.replace("\"", "&quot;");
+        s = s.replace("'", "&apos;");
+        s = s.replace("<", "&lt;");
+        s = s.replace(">", "&gt;");
 
-		return s;
-	}
+        return s;
+    }
 }

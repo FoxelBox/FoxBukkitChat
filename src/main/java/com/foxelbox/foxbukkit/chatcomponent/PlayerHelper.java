@@ -16,10 +16,11 @@
  */
 package com.foxelbox.foxbukkit.chatcomponent;
 
-import net.minecraft.server.v1_7_R4.Packet;
-import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
+import net.minecraft.server.v1_8_R3.Packet;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class PlayerHelper {
@@ -31,7 +32,7 @@ public class PlayerHelper {
     }
 
     public static void refreshPlayerListRedis(Player ignoreMe) {
-        Player[] players = FBChatComponent.instance.getServer().getOnlinePlayers();
+        Collection<? extends Player> players = FBChatComponent.instance.getServer().getOnlinePlayers();
         final String keyName = "playersOnline:" + FBChatComponent.instance.configuration.getValue("server-name", "Main");
         FBChatComponent.instance.redisManager.del(keyName);
         for(Player ply : players) {

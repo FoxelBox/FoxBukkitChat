@@ -16,14 +16,14 @@
  */
 package com.foxelbox.foxbukkit.chatcomponent.html;
 
-import net.minecraft.server.v1_7_R4.ChatModifier;
+import net.minecraft.server.v1_8_R3.ChatModifier;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class U extends Element {
-	@Override
-	protected void modifyStyle(ChatModifier style) {
-		style.setUnderline(true);
-	}
+    @Override
+    protected void modifyStyle(ChatModifier style) {
+        style.setUnderline(true);
+    }
 }

@@ -25,26 +25,26 @@ import java.util.UUID;
 
 @SuppressWarnings("UnusedDeclaration")
 public class Utils {
-	public static String concat(Collection<String> parts, int start, String defaultText) {
-		// TODO: optimize
-		return concatArray(parts.toArray(new String[parts.size()]), start, defaultText);
-	}
+    public static String concat(Collection<String> parts, int start, String defaultText) {
+        // TODO: optimize
+        return concatArray(parts.toArray(new String[parts.size()]), start, defaultText);
+    }
 
-	public static UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("[CONSOLE]".getBytes());
+    public static UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("[CONSOLE]".getBytes());
 
-	public static UUID getCommandSenderUUID(CommandSender commandSender) {
-		if(commandSender instanceof Player)
-			return ((Player) commandSender).getUniqueId();
-		if(commandSender instanceof ConsoleCommandSender)
-			return CONSOLE_UUID;
-		return UUID.nameUUIDFromBytes(("[CSUUID:" + commandSender.getClass().getName() + "]").getBytes());
-	}
+    public static UUID getCommandSenderUUID(CommandSender commandSender) {
+        if(commandSender instanceof Player)
+            return ((Player) commandSender).getUniqueId();
+        if(commandSender instanceof ConsoleCommandSender)
+            return CONSOLE_UUID;
+        return UUID.nameUUIDFromBytes(("[CSUUID:" + commandSender.getClass().getName() + "]").getBytes());
+    }
 
-	public static String getCommandSenderDisplayName(CommandSender commandSender) {
-		if(commandSender instanceof Player)
-			return ((Player) commandSender).getDisplayName();
-		return commandSender.getName();
-	}
+    public static String getCommandSenderDisplayName(CommandSender commandSender) {
+        if(commandSender instanceof Player)
+            return ((Player) commandSender).getDisplayName();
+        return commandSender.getName();
+    }
 
     public static String XMLEscape(String s) {
         s = s.replace("&", "&amp;");
@@ -60,27 +60,27 @@ public class Utils {
         return getPlayerUUID(player, true);
     }
 
-	public static UUID getPlayerUUID(Player player, boolean mayUseRedis) {
+    public static UUID getPlayerUUID(Player player, boolean mayUseRedis) {
         if(mayUseRedis) {
             String uuid = PlayerHelper.playerNameToUUID.get(player.getName().toLowerCase());
             if (uuid != null)
                 return UUID.fromString(uuid);
         }
-		return FishBansResolver.getUUID(player.getName());
-	}
+        return FishBansResolver.getUUID(player.getName());
+    }
 
-	public static String concatArray(String[] array, int start, String defaultText) {
-		if (array.length <= start)
-			return defaultText;
+    public static String concatArray(String[] array, int start, String defaultText) {
+        if (array.length <= start)
+            return defaultText;
 
-		if (array.length <= start + 1)
-			return array[start]; // optimization
+        if (array.length <= start + 1)
+            return array[start]; // optimization
 
-		StringBuilder ret = new StringBuilder(array[start]);
-		for(int i = start + 1; i < array.length; i++) {
-			ret.append(' ');
-			ret.append(array[i]);
-		}
-		return ret.toString();
-	}
+        StringBuilder ret = new StringBuilder(array[start]);
+        for(int i = start + 1; i < array.length; i++) {
+            ret.append(' ');
+            ret.append(array[i]);
+        }
+        return ret.toString();
+    }
 }

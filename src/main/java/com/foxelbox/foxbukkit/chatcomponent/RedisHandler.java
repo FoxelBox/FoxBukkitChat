@@ -26,17 +26,17 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public class RedisHandler extends AbstractRedisHandler {
-	public RedisHandler() {
-		super(FBChatComponent.instance.redisManager, "foxbukkit:to_server");
-	}
+    public RedisHandler() {
+        super(FBChatComponent.instance.redisManager, "foxbukkit:to_server");
+    }
 
-	public static void sendMessage(final CommandSender player, final String message) {
+    public static void sendMessage(final CommandSender player, final String message) {
         sendMessage(player, message, "text");
     }
 
     public static void sendMessage(final CommandSender player, final String message, final String type) {
-		if(player == null || message == null)
-			throw new NullPointerException();
+        if(player == null || message == null)
+            throw new NullPointerException();
         ChatMessageIn messageIn = new ChatMessageIn(player);
         messageIn.contents = message;
         messageIn.type = type;
@@ -45,65 +45,65 @@ public class RedisHandler extends AbstractRedisHandler {
             messageJSON = gson.toJson(messageIn);
         }
         FBChatComponent.instance.redisManager.lpush("foxbukkit:from_server", messageJSON);
-	}
+    }
 
-	private static final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
-	@Override
-	public void onMessage(final String c_message) {
-		try {
-			final ChatMessageOut chatMessageOut;
-			synchronized (gson) {
-				chatMessageOut = gson.fromJson(c_message, ChatMessageOut.class);
-			}
+    @Override
+    public void onMessage(final String c_message) {
+        try {
+            final ChatMessageOut chatMessageOut;
+            synchronized (gson) {
+                chatMessageOut = gson.fromJson(c_message, ChatMessageOut.class);
+            }
 
-			onMessage(chatMessageOut);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            onMessage(chatMessageOut);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	public void onMessage(final ChatMessageOut chatMessageOut) {
-		try {
-			if(!chatMessageOut.type.equals("text"))
-				return;
+    public void onMessage(final ChatMessageOut chatMessageOut) {
+        try {
+            if(!chatMessageOut.type.equals("text"))
+                return;
 
-			Collection<? extends Player> allPlayers = Arrays.asList(FBChatComponent.instance.getServer().getOnlinePlayers());
-			List<Player> targetPlayers = new ArrayList<>();
-			switch(chatMessageOut.to.type) {
-				case "all":
-					targetPlayers = new ArrayList<>(allPlayers);
-					break;
-				case "permission":
-					for(String permission : chatMessageOut.to.filter)
-						for (Player player : allPlayers)
-							if (player.hasPermission(permission) && !targetPlayers.contains(player))
-								targetPlayers.add(player);
-					break;
-				case "player":
-					for(String playerUUID : chatMessageOut.to.filter)
-						for (Player player : allPlayers)
-							if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
-								targetPlayers.add(player);
-					break;
-			}
+            Collection<? extends Player> allPlayers = FBChatComponent.instance.getServer().getOnlinePlayers();
+            List<Player> targetPlayers = new ArrayList<>();
+            switch(chatMessageOut.to.type) {
+                case "all":
+                    targetPlayers = new ArrayList<>(allPlayers);
+                    break;
+                case "permission":
+                    for(String permission : chatMessageOut.to.filter)
+                        for (Player player : allPlayers)
+                            if (player.hasPermission(permission) && !targetPlayers.contains(player))
+                                targetPlayers.add(player);
+                    break;
+                case "player":
+                    for(String playerUUID : chatMessageOut.to.filter)
+                        for (Player player : allPlayers)
+                            if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
+                                targetPlayers.add(player);
+                    break;
+            }
 
-			if(targetPlayers.isEmpty())
-				return;
+            if(targetPlayers.isEmpty())
+                return;
 
-			if (!chatMessageOut.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
-				if(chatMessageOut.contents != null) {
-					chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
-				}
-			}
+            if (!chatMessageOut.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
+                if(chatMessageOut.contents != null) {
+                    chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
+                }
+            }
 
-			if(chatMessageOut.contents != null) {
-				HTMLParser.sendToPlayers(targetPlayers, chatMessageOut.contents);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            if(chatMessageOut.contents != null) {
+                HTMLParser.sendToPlayers(targetPlayers, chatMessageOut.contents);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

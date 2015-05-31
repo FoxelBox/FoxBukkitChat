@@ -30,11 +30,11 @@ import java.util.HashSet;
 import java.util.List;
 
 public class FBChatComponent extends JavaPlugin {
-	public static FBChatComponent instance;
+    public static FBChatComponent instance;
 
-	public FBChatComponent() {
-		instance = this;
-	}
+    public FBChatComponent() {
+        instance = this;
+    }
 
     public Configuration configuration;
 
@@ -50,22 +50,22 @@ public class FBChatComponent extends JavaPlugin {
         }
     }
 
-	@Override
-	public void onEnable() {
-		super.onEnable();
+    @Override
+    public void onEnable() {
+        super.onEnable();
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
-		redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
+        redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
         new RedisHandler();
 
         loadRedisCommands();
 
-		getServer().getPluginManager().registerEvents(new FBChatListener(), this);
+        getServer().getPluginManager().registerEvents(new FBChatListener(), this);
 
         PlayerHelper.refreshPlayerListRedis(null);
-	}
+    }
 
-	class FBChatListener implements Listener {
+    class FBChatListener implements Listener {
         @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
         public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
             final Player ply = event.getPlayer();
@@ -87,34 +87,34 @@ public class FBChatComponent extends JavaPlugin {
             }
         }
 
-		@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-		public void onPlayerChat(AsyncPlayerChatEvent event) {
+        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        public void onPlayerChat(AsyncPlayerChatEvent event) {
             event.setCancelled(true);
             final String msg = event.getMessage();
             final Player ply = event.getPlayer();
             RedisHandler.sendMessage(ply, msg);
-		}
+        }
 
-		@EventHandler(priority = EventPriority.MONITOR)
-		public void onPlayerJoin(PlayerJoinEvent event) {
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPlayerJoin(PlayerJoinEvent event) {
             PlayerHelper.refreshUUID(event.getPlayer());
             PlayerHelper.refreshPlayerListRedis(null);
-			event.setJoinMessage(null);
-			RedisHandler.sendMessage(event.getPlayer(), "join", "playerstate");
-		}
+            event.setJoinMessage(null);
+            RedisHandler.sendMessage(event.getPlayer(), "join", "playerstate");
+        }
 
-		@EventHandler(priority = EventPriority.MONITOR)
-		public void onPlayerQuit(PlayerQuitEvent event) {
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPlayerQuit(PlayerQuitEvent event) {
             PlayerHelper.refreshPlayerListRedis(event.getPlayer());
-			event.setQuitMessage(null);
-			RedisHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
-		}
+            event.setQuitMessage(null);
+            RedisHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
+        }
 
-		@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-		public void onPlayerKick(PlayerKickEvent event) {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+        public void onPlayerKick(PlayerKickEvent event) {
             PlayerHelper.refreshPlayerListRedis(event.getPlayer());
-			event.setLeaveMessage(null);
-			RedisHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
-		}
-	}
+            event.setLeaveMessage(null);
+            RedisHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
+        }
+    }
 }

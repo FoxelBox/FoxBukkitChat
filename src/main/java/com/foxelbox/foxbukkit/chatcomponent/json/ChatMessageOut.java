@@ -19,15 +19,15 @@ package com.foxelbox.foxbukkit.chatcomponent.json;
 import java.util.UUID;
 
 public class ChatMessageOut {
-	public String server;
-	public UserInfo from;
-	public MessageTarget to;
+    public String server;
+    public UserInfo from;
+    public MessageTarget to;
 
-	public long timestamp = System.currentTimeMillis() / 1000;
+    public long timestamp = System.currentTimeMillis() / 1000;
 
-	public UUID context;
-	public boolean finalize_context = false;
-	public String type = "text";
+    public UUID context;
+    public boolean finalize_context = false;
+    public String type = "text";
 
-	public String contents;
+    public String contents;
 }
