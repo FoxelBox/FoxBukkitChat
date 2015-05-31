@@ -40,6 +40,14 @@ public class FBChatComponent extends JavaPlugin {
     public RedisManager redisManager;
     public RedisHandler redisHandler;
 
+    public RedisManager getRedisManager() {
+        return redisManager;
+    }
+
+    public RedisHandler getRedisHandler() {
+        return redisHandler;
+    }
+
     private final HashSet<String> redisCommands = new HashSet<>();
     public void loadRedisCommands() {
         List<String> commands = redisManager.lrange("chatLinkCommands", 0, -1);
