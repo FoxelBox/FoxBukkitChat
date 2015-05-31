@@ -57,6 +57,15 @@ public class RedisHandler extends AbstractRedisHandler {
 				chatMessageOut = gson.fromJson(c_message, ChatMessageOut.class);
 			}
 
+			onMessage(chatMessageOut);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void onMessage(final ChatMessageOut chatMessageOut) {
+		try {
 			if(!chatMessageOut.type.equals("text"))
 				return;
 
