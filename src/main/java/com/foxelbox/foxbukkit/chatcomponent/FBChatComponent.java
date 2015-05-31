@@ -37,8 +37,8 @@ public class FBChatComponent extends JavaPlugin {
     }
 
     public Configuration configuration;
-
     public RedisManager redisManager;
+    public RedisHandler redisHandler;
 
     private final HashSet<String> redisCommands = new HashSet<>();
     public void loadRedisCommands() {
@@ -56,7 +56,7 @@ public class FBChatComponent extends JavaPlugin {
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
         redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
-        new RedisHandler();
+        redisHandler = new RedisHandler();
 
         loadRedisCommands();
 
