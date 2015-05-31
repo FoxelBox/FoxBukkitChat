@@ -34,17 +34,25 @@ public class RedisHandler extends AbstractRedisHandler {
         sendMessage(player, message, "text");
     }
 
-    public static void sendMessage(final CommandSender player, final String message, final String type) {
-        if(player == null || message == null)
+    public static void sendMessage(final ChatMessageIn messageIn) {
+        if(messageIn == null)
             throw new NullPointerException();
-        ChatMessageIn messageIn = new ChatMessageIn(player);
-        messageIn.contents = message;
-        messageIn.type = type;
         final String messageJSON;
         synchronized (gson) {
             messageJSON = gson.toJson(messageIn);
         }
         FBChatComponent.instance.redisManager.lpush("foxbukkit:from_server", messageJSON);
+    }
+
+    public static void sendMessage(final CommandSender player, final String message, final String type) {
+        if(player == null || message == null)
+            throw new NullPointerException();
+        ChatMessageIn messageIn = new ChatMessageIn(player);
+        messageIn.contents = message;
+        if(type != null) {
+            messageIn.type = type;
+        }
+        sendMessage(messageIn);
     }
 
     private static final Gson gson = new Gson();
