@@ -27,8 +27,8 @@ public class PlayerHelper {
     public static Map<String,String> playerNameToUUID = FBChatComponent.instance.redisManager.createCachedRedisMap("playerNameToUUID");
     public static Map<String,String> playerUUIDToName = FBChatComponent.instance.redisManager.createCachedRedisMap("playerUUIDToName");
     public static void refreshUUID(Player player) {
-        playerUUIDToName.put(Utils.getPlayerUUID(player).toString(), player.getName());
-        playerNameToUUID.put(player.getName().toLowerCase(), Utils.getPlayerUUID(player).toString());
+        playerUUIDToName.put(player.getUniqueId().toString(), player.getName());
+        playerNameToUUID.put(player.getName().toLowerCase(), player.getUniqueId().toString());
     }
 
     public static void refreshPlayerListRedis(Player ignoreMe) {
@@ -38,7 +38,7 @@ public class PlayerHelper {
         for(Player ply : players) {
             if(ply.equals(ignoreMe))
                 continue;
-            FBChatComponent.instance.redisManager.lpush(keyName, Utils.getPlayerUUID(ply).toString());
+            FBChatComponent.instance.redisManager.lpush(keyName, ply.getUniqueId().toString());
         }
     }
 

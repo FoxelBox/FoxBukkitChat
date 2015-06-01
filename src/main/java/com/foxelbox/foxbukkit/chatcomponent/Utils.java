@@ -56,19 +56,6 @@ public class Utils {
         return s;
     }
 
-    public static UUID getPlayerUUID(Player player) {
-        return getPlayerUUID(player, true);
-    }
-
-    public static UUID getPlayerUUID(Player player, boolean mayUseRedis) {
-        if(mayUseRedis) {
-            String uuid = PlayerHelper.playerNameToUUID.get(player.getName().toLowerCase());
-            if (uuid != null)
-                return UUID.fromString(uuid);
-        }
-        return FishBansResolver.getUUID(player.getName());
-    }
-
     public static String concatArray(String[] array, int start, String defaultText) {
         if (array.length <= start)
             return defaultText;
