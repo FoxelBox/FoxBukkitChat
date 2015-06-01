@@ -19,7 +19,6 @@ package com.foxelbox.foxbukkit.chatcomponent.html;
 import com.foxelbox.foxbukkit.chatcomponent.HTMLParser;
 import net.minecraft.server.v1_8_R3.*;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlMixed;

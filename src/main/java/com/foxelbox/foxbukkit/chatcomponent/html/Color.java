@@ -16,14 +16,12 @@
  */
 package com.foxelbox.foxbukkit.chatcomponent.html;
 
-import net.minecraft.server.v1_8_R3.ChatBaseComponent;
 import net.minecraft.server.v1_8_R3.ChatModifier;
 import net.minecraft.server.v1_8_R3.EnumChatFormat;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
 
 @XmlRootElement
