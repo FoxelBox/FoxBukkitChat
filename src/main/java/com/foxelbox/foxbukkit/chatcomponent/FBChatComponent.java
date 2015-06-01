@@ -74,7 +74,7 @@ public class FBChatComponent extends JavaPlugin {
     }
 
     class FBChatListener implements Listener {
-        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
             final Player ply = event.getPlayer();
             final String baseCmd = event.getMessage().substring(1).trim();
@@ -95,7 +95,7 @@ public class FBChatComponent extends JavaPlugin {
             }
         }
 
-        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onPlayerChat(AsyncPlayerChatEvent event) {
             event.setCancelled(true);
             final String msg = event.getMessage();
