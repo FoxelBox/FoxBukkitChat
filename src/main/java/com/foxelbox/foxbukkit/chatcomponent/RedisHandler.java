@@ -100,7 +100,7 @@ public class RedisHandler extends AbstractRedisHandler {
             if(targetPlayers.isEmpty())
                 return;
 
-            if (!chatMessageOut.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
+            if (chatMessageOut.server != null && !chatMessageOut.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
                 if(chatMessageOut.contents != null) {
                     chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
                 }
