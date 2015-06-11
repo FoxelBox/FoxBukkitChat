@@ -65,7 +65,6 @@ public class FoxBukkitChat extends JavaPlugin {
         super.onDisable();
 
         redisManager.stop();
-        redisHandler.stop();
     }
 
     @Override
