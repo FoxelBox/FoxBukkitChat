@@ -24,25 +24,33 @@ import java.util.Collection;
 import java.util.Map;
 
 public class PlayerHelper {
-    public static Map<String,String> playerNameToUUID = FBChatComponent.instance.redisManager.createCachedRedisMap("playerNameToUUID");
-    public static Map<String,String> playerUUIDToName = FBChatComponent.instance.redisManager.createCachedRedisMap("playerUUIDToName");
-    public static void refreshUUID(Player player) {
+    private FBChatComponent plugin;
+    public Map<String,String> playerNameToUUID;
+    public Map<String,String> playerUUIDToName;
+
+    public void refreshUUID(Player player) {
         playerUUIDToName.put(player.getUniqueId().toString(), player.getName());
         playerNameToUUID.put(player.getName().toLowerCase(), player.getUniqueId().toString());
     }
 
-    public static void refreshPlayerListRedis(Player ignoreMe) {
-        Collection<? extends Player> players = FBChatComponent.instance.getServer().getOnlinePlayers();
-        final String keyName = "playersOnline:" + FBChatComponent.instance.configuration.getValue("server-name", "Main");
-        FBChatComponent.instance.redisManager.del(keyName);
+    public PlayerHelper(FBChatComponent plugin) {
+        this.plugin = plugin;
+        playerNameToUUID = plugin.redisManager.createCachedRedisMap("playerNameToUUID");
+        playerUUIDToName = plugin.redisManager.createCachedRedisMap("playerUUIDToName");
+    }
+
+    public void refreshPlayerListRedis(Player ignoreMe) {
+        Collection<? extends Player> players = plugin.getServer().getOnlinePlayers();
+        final String keyName = "playersOnline:" + plugin.configuration.getValue("server-name", "Main");
+        plugin.redisManager.del(keyName);
         for(Player ply : players) {
             if(ply.equals(ignoreMe))
                 continue;
-            FBChatComponent.instance.redisManager.lpush(keyName, ply.getUniqueId().toString());
+            plugin.redisManager.lpush(keyName, ply.getUniqueId().toString());
         }
     }
 
-    public static void sendPacketToPlayer(final Player ply, final Packet packet) {
+    public void sendPacketToPlayer(final Player ply, final Packet packet) {
         ((CraftPlayer)ply).getHandle().playerConnection.sendPacket(packet);
     }
 }

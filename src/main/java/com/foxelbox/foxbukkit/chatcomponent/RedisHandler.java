@@ -29,28 +29,30 @@ import java.util.List;
 import java.util.UUID;
 
 public class RedisHandler extends AbstractRedisHandler {
-    public RedisHandler() {
-        super(FBChatComponent.instance.redisManager, "foxbukkit:to_server");
+    private final FBChatComponent plugin;
+    public RedisHandler(FBChatComponent plugin) {
+        super(plugin.redisManager, "foxbukkit:to_server");
+        this.plugin = plugin;
     }
 
-    public static void sendMessage(final CommandSender player, final String message) {
+    public void sendMessage(final CommandSender player, final String message) {
         sendMessage(player, message, "text");
     }
 
-    public static void sendMessage(final ChatMessageIn messageIn) {
+    public void sendMessage(final ChatMessageIn messageIn) {
         if(messageIn == null)
             throw new NullPointerException();
         final String messageJSON;
         synchronized (gson) {
             messageJSON = gson.toJson(messageIn);
         }
-        FBChatComponent.instance.redisManager.lpush("foxbukkit:from_server", messageJSON);
+        plugin.redisManager.lpush("foxbukkit:from_server", messageJSON);
     }
 
-    public static void sendMessage(final CommandSender player, final String message, final String type) {
+    public void sendMessage(final CommandSender player, final String message, final String type) {
         if(player == null || message == null)
             throw new NullPointerException();
-        ChatMessageIn messageIn = new ChatMessageIn(player);
+        ChatMessageIn messageIn = new ChatMessageIn(plugin, player);
         messageIn.contents = message;
         if(type != null) {
             messageIn.type = type;
@@ -80,7 +82,7 @@ public class RedisHandler extends AbstractRedisHandler {
             if(!chatMessageOut.type.equals("text"))
                 return;
 
-            Collection<? extends Player> allPlayers = FBChatComponent.instance.getServer().getOnlinePlayers();
+            Collection<? extends Player> allPlayers = plugin.getServer().getOnlinePlayers();
             List<Player> targetPlayers = new ArrayList<>();
             switch(chatMessageOut.to.type) {
                 case "all":
@@ -103,14 +105,14 @@ public class RedisHandler extends AbstractRedisHandler {
             if(targetPlayers.isEmpty())
                 return;
 
-            if (chatMessageOut.server != null && !chatMessageOut.server.equals(FBChatComponent.instance.configuration.getValue("server-name", "Main"))) {
+            if (chatMessageOut.server != null && !chatMessageOut.server.equals(plugin.configuration.getValue("server-name", "Main"))) {
                 if(chatMessageOut.contents != null) {
                     chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
                 }
             }
 
             if(chatMessageOut.contents != null) {
-                HTMLParser.sendToPlayers(targetPlayers, chatMessageOut.contents);
+                HTMLParser.sendToPlayers(plugin, targetPlayers, chatMessageOut.contents);
             }
         }
         catch (Exception e) {

@@ -108,11 +108,11 @@ public class HTMLParser {
         return parse(format);
     }
 
-    public static boolean sendToAll(String format) {
-        return sendToPlayers(Bukkit.getOnlinePlayers(), format);
+    public static boolean sendToAll(FBChatComponent plugin, String format) {
+        return sendToPlayers(plugin, plugin.getServer().getOnlinePlayers(), format);
     }
 
-    public static boolean sendToPlayers(Collection<? extends CommandSender> targetPlayers, String format) {
+    public static boolean sendToPlayers(FBChatComponent plugin, Collection<? extends CommandSender> targetPlayers, String format) {
         try {
             final PacketPlayOutChat packet = createChatPacket(format);
 
@@ -122,7 +122,7 @@ public class HTMLParser {
                     continue;
                 }
 
-                PlayerHelper.sendPacketToPlayer((Player) commandSender, packet);
+                plugin.playerHelper.sendPacketToPlayer((Player) commandSender, packet);
             }
 
             return true;
@@ -136,9 +136,9 @@ public class HTMLParser {
         }
     }
 
-    public static boolean sendToPlayer(Player player, String format) {
+    public static boolean sendToPlayer(FBChatComponent plugin, Player player, String format) {
         try {
-            PlayerHelper.sendPacketToPlayer(player, createChatPacket(format));
+            plugin.playerHelper.sendPacketToPlayer(player, createChatPacket(format));
 
             return true;
         } catch (Exception e) {

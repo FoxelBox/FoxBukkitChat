@@ -24,18 +24,18 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class ChatMessageIn {
-    public ChatMessageIn(CommandSender commandSender) {
-        this();
+    public ChatMessageIn(FBChatComponent plugin, CommandSender commandSender) {
+        this(plugin);
         if(commandSender instanceof Player)
             this.from = new UserInfo(Utils.getCommandSenderUUID(commandSender), commandSender.getName());
         else
             this.from = new UserInfo(Utils.CONSOLE_UUID, commandSender.getName());
     }
 
-    public ChatMessageIn() {
+    public ChatMessageIn(FBChatComponent plugin) {
         this.timestamp = System.currentTimeMillis() / 1000;
         this.context = UUID.randomUUID();
-        this.server = FBChatComponent.instance.configuration.getValue("server-name", "Main");
+        this.server = plugin.configuration.getValue("server-name", "Main");
     }
 
     public String server;
