@@ -61,8 +61,17 @@ public class FoxBukkitChat extends JavaPlugin {
     }
 
     @Override
+    public void onDisable() {
+        super.onDisable();
+
+        redisManager.stop();
+        redisHandler.stop();
+    }
+
+    @Override
     public void onEnable() {
         super.onEnable();
+
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
         redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
