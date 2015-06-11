@@ -1,20 +1,20 @@
 /**
- * This file is part of FoxBukkitChatComponent.
+ * This file is part of FoxBukkitChat.
  *
- * FoxBukkitChatComponent is free software: you can redistribute it and/or modify
+ * FoxBukkitChat is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FoxBukkitChatComponent is distributed in the hope that it will be useful,
+ * FoxBukkitChat is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FoxBukkitChat.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.foxelbox.foxbukkit.chatcomponent;
+package com.foxelbox.foxbukkit.chat;
 
 import net.minecraft.server.v1_8_R3.Packet;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public class PlayerHelper {
-    private FBChatComponent plugin;
+    private FoxBukkitChat plugin;
     public Map<String,String> playerNameToUUID;
     public Map<String,String> playerUUIDToName;
 
@@ -33,7 +33,7 @@ public class PlayerHelper {
         playerNameToUUID.put(player.getName().toLowerCase(), player.getUniqueId().toString());
     }
 
-    public PlayerHelper(FBChatComponent plugin) {
+    public PlayerHelper(FoxBukkitChat plugin) {
         this.plugin = plugin;
         playerNameToUUID = plugin.redisManager.createCachedRedisMap("playerNameToUUID");
         playerUUIDToName = plugin.redisManager.createCachedRedisMap("playerUUIDToName");

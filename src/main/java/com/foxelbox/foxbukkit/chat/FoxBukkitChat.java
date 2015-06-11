@@ -1,20 +1,20 @@
 /**
- * This file is part of FoxBukkitChatComponent.
+ * This file is part of FoxBukkitChat.
  *
- * FoxBukkitChatComponent is free software: you can redistribute it and/or modify
+ * FoxBukkitChat is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FoxBukkitChatComponent is distributed in the hope that it will be useful,
+ * FoxBukkitChat is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with FoxBukkitChatComponent.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FoxBukkitChat.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.foxelbox.foxbukkit.chatcomponent;
+package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.RedisManager;
@@ -32,8 +32,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashSet;
 import java.util.List;
 
-public class FBChatComponent extends JavaPlugin {
-    public FBChatComponent() {
+public class FoxBukkitChat extends JavaPlugin {
+    public FoxBukkitChat() {
 
     }
 
