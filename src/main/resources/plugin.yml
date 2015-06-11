@@ -1,6 +1,6 @@
 name: FoxBukkitChatComponent
 main: com.foxelbox.foxbukkit.chatcomponent.FBChatComponent
-version: 1.2.0
+version: 1.3.0
   reloadclcommands:
     description: Reloads the ChatLink command list
     permission: foxbukkit.chatlink.reloadcommands

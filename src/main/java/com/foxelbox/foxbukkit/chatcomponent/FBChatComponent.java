@@ -19,6 +19,9 @@ package com.foxelbox.foxbukkit.chatcomponent;
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.RedisManager;
 import com.foxelbox.dependencies.threading.SimpleThreadCreator;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -71,6 +74,14 @@ public class FBChatComponent extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new FBChatListener(), this);
 
         playerHelper.refreshPlayerListRedis(null);
+
+        getServer().getPluginCommand("reloadclcommands").setExecutor(new CommandExecutor() {
+            @Override
+            public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+                loadRedisCommands();
+                return true;
+            }
+        });
     }
 
     class FBChatListener implements Listener {
