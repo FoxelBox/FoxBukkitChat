@@ -31,11 +31,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class FoxBukkitChat extends JavaPlugin {
     public FoxBukkitChat() {
 
     }
+
+    HashSet<UUID> registeredPlayers = new HashSet<>();
 
     public Configuration configuration;
     public RedisManager redisManager;
@@ -127,21 +130,27 @@ public class FoxBukkitChat extends JavaPlugin {
             playerHelper.refreshUUID(event.getPlayer());
             playerHelper.refreshPlayerListRedis(null);
             event.setJoinMessage(null);
-            redisHandler.sendMessage(event.getPlayer(), "join", "playerstate");
+            if(registeredPlayers.add(event.getPlayer().getUniqueId())) {
+                redisHandler.sendMessage(event.getPlayer(), "join", "playerstate");
+            }
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerQuit(PlayerQuitEvent event) {
             playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setQuitMessage(null);
-            redisHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
+            if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
+                redisHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
+            }
         }
 
         @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         public void onPlayerKick(PlayerKickEvent event) {
             playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setLeaveMessage(null);
-            redisHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
+            if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
+                redisHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
+            }
         }
     }
 }

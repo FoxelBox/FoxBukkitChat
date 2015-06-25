@@ -79,8 +79,17 @@ public class RedisHandler extends AbstractRedisHandler {
 
     public void onMessage(final ChatMessageOut chatMessageOut) {
         try {
-            if(!chatMessageOut.type.equals("text"))
+            if(chatMessageOut.type.equals("kick")) {
+                UUID target = UUID.fromString(chatMessageOut.to.filter[0]);
+                Player ply = plugin.getServer().getPlayer(target);
+                if (ply != null) {
+                    plugin.registeredPlayers.remove(target);
+                    ply.kickPlayer(chatMessageOut.contents);
+                }
                 return;
+            }  else if(!chatMessageOut.type.equals("text")) {
+                return;
+            }
 
             Collection<? extends Player> allPlayers = plugin.getServer().getOnlinePlayers();
             List<Player> targetPlayers = new ArrayList<>();
