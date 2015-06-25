@@ -83,10 +83,10 @@ public class RedisHandler extends AbstractRedisHandler {
                 final UUID target = UUID.fromString(chatMessageOut.to.filter[0]);
                 final Player ply = plugin.getServer().getPlayer(target);
                 if (ply != null) {
-                    plugin.registeredPlayers.remove(target);
                     plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
                         @Override
                         public void run() {
+                            plugin.registeredPlayers.remove(target);
                             ply.kickPlayer(chatMessageOut.contents);
                         }
                     });
