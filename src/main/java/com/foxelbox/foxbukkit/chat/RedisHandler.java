@@ -80,11 +80,16 @@ public class RedisHandler extends AbstractRedisHandler {
     public void onMessage(final ChatMessageOut chatMessageOut) {
         try {
             if(chatMessageOut.type.equals("kick")) {
-                UUID target = UUID.fromString(chatMessageOut.to.filter[0]);
-                Player ply = plugin.getServer().getPlayer(target);
+                final UUID target = UUID.fromString(chatMessageOut.to.filter[0]);
+                final Player ply = plugin.getServer().getPlayer(target);
                 if (ply != null) {
                     plugin.registeredPlayers.remove(target);
-                    ply.kickPlayer(chatMessageOut.contents);
+                    plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                        @Override
+                        public void run() {
+                            ply.kickPlayer(chatMessageOut.contents);
+                        }
+                    });
                 }
                 return;
             }  else if(!chatMessageOut.type.equals("text")) {
