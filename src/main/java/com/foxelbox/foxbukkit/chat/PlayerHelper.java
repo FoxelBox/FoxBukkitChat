@@ -52,17 +52,15 @@ public class PlayerHelper {
     }
 
     private Set<UUID> putIgnoreCache(UUID uuid, String data) {
-        if(data == null) {
-            synchronized (ignoreCache) {
-                ignoreCache.remove(uuid);
-            }
-            return null;
-        }
         HashSet<UUID> dataSet = new HashSet<>();
-        for(String entry : data.split(",")) {
-            dataSet.add(UUID.fromString(entry));
+        if(data != null && !data.isEmpty()) {
+            for (String entry : data.split(",")) {
+                dataSet.add(UUID.fromString(entry));
+            }
         }
-        ignoreCache.put(uuid, dataSet);
+        synchronized (ignoreCache) {
+            ignoreCache.put(uuid, dataSet);
+        }
         return dataSet;
     }
 
