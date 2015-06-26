@@ -16,17 +16,20 @@
  */
 package com.foxelbox.foxbukkit.chat;
 
+import com.foxelbox.dependencies.redis.CacheMap;
 import net.minecraft.server.v1_8_R3.Packet;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerHelper {
     private FoxBukkitChat plugin;
     public Map<String,String> playerNameToUUID;
     public Map<String,String> playerUUIDToName;
+
+    public Map<String,String> ignoredByList;
+    private final Map<UUID, Set<UUID>> ignoreCache;
 
     public void refreshUUID(Player player) {
         playerUUIDToName.put(player.getUniqueId().toString(), player.getName());
@@ -37,6 +40,40 @@ public class PlayerHelper {
         this.plugin = plugin;
         playerNameToUUID = plugin.redisManager.createCachedRedisMap("playerNameToUUID");
         playerUUIDToName = plugin.redisManager.createCachedRedisMap("playerUUIDToName");
+        ignoreCache = new HashMap<>();
+        ignoredByList = plugin.redisManager.createCachedRedisMap("ignoredByList").addOnChangeHook(new CacheMap.OnChangeHook() {
+            @Override
+            public void onEntryChanged(String key, String value) {
+                synchronized (ignoreCache) {
+                    putIgnoreCache(UUID.fromString(key), value);
+                }
+            }
+        });
+    }
+
+    private Set<UUID> putIgnoreCache(UUID uuid, String data) {
+        if(data == null) {
+            synchronized (ignoreCache) {
+                ignoreCache.remove(uuid);
+            }
+            return null;
+        }
+        HashSet<UUID> dataSet = new HashSet<>();
+        for(String entry : data.split(",")) {
+            dataSet.add(UUID.fromString(entry));
+        }
+        ignoreCache.put(uuid, dataSet);
+        return dataSet;
+    }
+
+    public Set<UUID> getIgnoredBy(UUID uuid) {
+        synchronized (ignoreCache) {
+            Set<UUID> result = ignoreCache.get(uuid);
+            if(result == null) {
+                result = putIgnoreCache(uuid, ignoredByList.get(uuid.toString()));
+            }
+            return result;
+        }
     }
 
     public void refreshPlayerListRedis(Player ignoreMe) {

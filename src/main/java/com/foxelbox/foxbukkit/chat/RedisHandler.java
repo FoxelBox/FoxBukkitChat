@@ -23,10 +23,7 @@ import com.google.gson.Gson;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class RedisHandler extends AbstractRedisHandler {
     private final FoxBukkitChat plugin;
@@ -116,8 +113,21 @@ public class RedisHandler extends AbstractRedisHandler {
                     break;
             }
 
-            if(targetPlayers.isEmpty())
+            if(chatMessageOut.from.uuid != null) {
+                Set<UUID> ignoringSet = plugin.playerHelper.getIgnoredBy(chatMessageOut.from.uuid);
+                if(ignoringSet != null) {
+                    Iterator<Player> playerIterator = targetPlayers.iterator();
+                    while(playerIterator.hasNext()) {
+                        if(ignoringSet.contains(playerIterator.next().getUniqueId())) {
+                            playerIterator.remove();
+                        }
+                    }
+                }
+            }
+
+            if(targetPlayers.isEmpty()) {
                 return;
+            }
 
             if (chatMessageOut.server != null && !chatMessageOut.server.equals(plugin.configuration.getValue("server-name", "Main"))) {
                 if(chatMessageOut.contents != null) {
