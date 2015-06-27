@@ -113,7 +113,7 @@ public class RedisHandler extends AbstractRedisHandler {
                     break;
             }
 
-            if(chatMessageOut.from.uuid != null) {
+            if(chatMessageOut.from != null && chatMessageOut.from.uuid != null) {
                 Set<UUID> ignoringSet = plugin.playerHelper.getIgnoredBy(chatMessageOut.from.uuid);
                 if(ignoringSet != null) {
                     Iterator<Player> playerIterator = targetPlayers.iterator();
