@@ -45,6 +45,14 @@ public class FoxBukkitChat extends JavaPlugin {
     public RedisHandler redisHandler;
     public PlayerHelper playerHelper;
 
+    public String getPlayerNick(Player ply) {
+        return getPlayerNick(ply.getUniqueId());
+    }
+
+    public String getPlayerNick(UUID uuid) {
+        return playerHelper.playerNicks.get(uuid.toString());
+    }
+
     public RedisManager getRedisManager() {
         return redisManager;
     }

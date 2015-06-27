@@ -28,6 +28,8 @@ public class PlayerHelper {
     public Map<String,String> playerNameToUUID;
     public Map<String,String> playerUUIDToName;
 
+    public Map<String,String> playerNicks;
+
     public Map<String,String> ignoredByList;
     private final Map<UUID, Set<UUID>> ignoreCache;
 
@@ -40,6 +42,7 @@ public class PlayerHelper {
         this.plugin = plugin;
         playerNameToUUID = plugin.redisManager.createCachedRedisMap("playerNameToUUID");
         playerUUIDToName = plugin.redisManager.createCachedRedisMap("playerUUIDToName");
+        playerNicks = plugin.redisManager.createCachedRedisMap("playernicks");
         ignoreCache = new HashMap<>();
         ignoredByList = plugin.redisManager.createCachedRedisMap("ignoredByList").addOnChangeHook(new CacheMap.OnChangeHook() {
             @Override
