@@ -83,6 +83,7 @@ public class RedisHandler extends AbstractRedisHandler {
                     plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
                         @Override
                         public void run() {
+                            plugin.playerHelper.refreshPlayerListRedis(ply);
                             plugin.registeredPlayers.remove(target);
                             ply.kickPlayer(chatMessageOut.contents);
                         }
