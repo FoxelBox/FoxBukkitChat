@@ -76,29 +76,11 @@ public class RedisHandler extends AbstractRedisHandler {
 
     public void onMessage(final ChatMessageOut chatMessageOut) {
         try {
-            if(chatMessageOut.type.equals("kick")) {
-                final UUID target = UUID.fromString(chatMessageOut.to.filter[0]);
-                final Player ply = plugin.getServer().getPlayer(target);
-                if (ply != null) {
-                    plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-                        @Override
-                        public void run() {
-                            plugin.playerHelper.refreshPlayerListRedis(ply);
-                            plugin.registeredPlayers.remove(target);
-                            ply.kickPlayer(chatMessageOut.contents);
-                        }
-                    });
-                }
-                return;
-            }  else if(!chatMessageOut.type.equals("text")) {
-                return;
-            }
-
             Collection<? extends Player> allPlayers = plugin.getServer().getOnlinePlayers();
-            List<Player> targetPlayers = new ArrayList<>();
+            final List<Player> targetPlayers = new ArrayList<>();
             switch(chatMessageOut.to.type) {
                 case "all":
-                    targetPlayers = new ArrayList<>(allPlayers);
+                    targetPlayers.addAll(allPlayers);
                     break;
                 case "permission":
                     for(String permission : chatMessageOut.to.filter)
@@ -112,6 +94,32 @@ public class RedisHandler extends AbstractRedisHandler {
                             if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
                                 targetPlayers.add(player);
                     break;
+            }
+
+            if(chatMessageOut.type.equals("kick")) {
+                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        for(Player target : targetPlayers) {
+                            plugin.playerHelper.refreshPlayerListRedis(target);
+                            plugin.registeredPlayers.remove(target.getUniqueId());
+                            target.kickPlayer(chatMessageOut.contents);
+                        }
+                    }
+                });
+                return;
+            } else if(chatMessageOut.type.equals("inject")) {
+                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        for (Player target : targetPlayers) {
+                            target.chat(chatMessageOut.contents);
+                        }
+                    }
+                });
+                return;
+            } else if(!chatMessageOut.type.equals("text")) {
+                return;
             }
 
             if(chatMessageOut.from != null && chatMessageOut.from.uuid != null) {
