@@ -109,11 +109,14 @@ public class RedisHandler extends AbstractRedisHandler {
                 });
                 return;
             } else if(chatMessageOut.type.equals("inject")) {
+                final String[] contents = chatMessageOut.contents.split("\n");
                 plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
                     @Override
                     public void run() {
                         for (Player target : targetPlayers) {
-                            target.chat(chatMessageOut.contents);
+                            for(String cmd : contents) {
+                                target.chat(cmd);
+                            }
                         }
                     }
                 });
