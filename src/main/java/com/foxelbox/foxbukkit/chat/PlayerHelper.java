@@ -84,7 +84,7 @@ public class PlayerHelper {
         for(Player ply : players) {
             if(ply.equals(ignoreMe))
                 continue;
-            plugin.redisManager.lpush(keyName, ply.getUniqueId().toString());
+            plugin.redisManager.sadd(keyName, ply.getUniqueId().toString());
         }
     }
 

@@ -19,6 +19,7 @@ package com.foxelbox.foxbukkit.chat;
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.RedisManager;
 import com.foxelbox.dependencies.threading.SimpleThreadCreator;
+import com.foxelbox.foxbukkit.chat.html.S;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,6 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class FoxBukkitChat extends JavaPlugin {
@@ -63,7 +65,7 @@ public class FoxBukkitChat extends JavaPlugin {
 
     private final HashSet<String> redisCommands = new HashSet<>();
     public void loadRedisCommands() {
-        List<String> commands = redisManager.lrange("chatLinkCommands", 0, -1);
+        Set<String> commands = redisManager.smembers("chatLinkCommands");
         synchronized (redisCommands) {
             redisCommands.clear();
             for (String str : commands)
