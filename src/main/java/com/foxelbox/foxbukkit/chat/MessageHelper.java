@@ -28,7 +28,15 @@ public class MessageHelper {
 	public static final String OFFLINE_COLOR = "dark_red";
 
 	public static String button(String command, String label, String color, boolean run) {
+		return button(command, label, color, run, true);
+	}
+
+	public static String button(String command, String label, String color, boolean run, boolean addHover) {
 		final String eventType = run ? "run_command" : "suggest_command";
-		return String.format("<color name=\"%3$s\" onClick=\"%4$s('%1$s')\" onHover=\"show_text('%1$s')\">[%2$s]</color>", escape(command), escape(label), escape(color), eventType);
+		if(addHover) {
+			return String.format("<color name=\"%3$s\" onClick=\"%4$s('%1$s')\" onHover=\"show_text('%1$s')\">[%2$s]</color>", escape(command), escape(label), escape(color), eventType);
+		} else {
+			return String.format("<color name=\"%3$s\" onClick=\"%4$s('%1$s')\">[%2$s]</color>", escape(command), escape(label), escape(color), eventType);
+		}
 	}
 }
