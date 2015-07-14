@@ -42,7 +42,7 @@ public class ChatMessageIn {
 
     public UserInfo from;
 
-    public long timestamp;
+    public Long timestamp;
     public UUID context;
 
     public String type;

@@ -23,10 +23,10 @@ public class ChatMessageOut {
     public UserInfo from;
     public MessageTarget to;
 
-    public long timestamp = System.currentTimeMillis() / 1000;
+    public Long timestamp = System.currentTimeMillis() / 1000;
 
     public UUID context;
-    public boolean finalize_context = false;
+    public Boolean finalizeContext = false;
     public String type = "text";
 
     public String contents;
