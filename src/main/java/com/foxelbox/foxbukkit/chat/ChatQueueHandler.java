@@ -34,7 +34,7 @@ public class ChatQueueHandler {
     private static final byte[] CMI = "CMI".getBytes();
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
-        sender = zmqContext.socket(ZMQ.PUB);
+        sender = zmqContext.socket(ZMQ.PUSH);
         sender.connect(plugin.configuration.getValue("zmq-server-to-broker", "tcp://127.0.0.1:5556"));
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
@@ -69,10 +69,7 @@ public class ChatQueueHandler {
             messageJSON = gson.toJson(messageIn);
         }
 
-        synchronized (sender) {
-            sender.send(CMI, ZMQ.SNDMORE);
-            sender.send(messageJSON);
-        }
+        sender.send(messageJSON);
     }
 
     public void sendMessage(final CommandSender player, final String message, final String type) {
