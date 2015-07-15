@@ -16,19 +16,43 @@
  */
 package com.foxelbox.foxbukkit.chat;
 
-import com.foxelbox.dependencies.redis.AbstractRedisHandler;
 import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
 import com.foxelbox.foxbukkit.chat.json.ChatMessageOut;
 import com.google.gson.Gson;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.zeromq.ZMQ;
 
+import java.nio.charset.Charset;
 import java.util.*;
 
-public class ChatQueueHandler extends AbstractRedisHandler {
+public class ChatQueueHandler {
     private final FoxBukkitChat plugin;
+    private final ZMQ.Context zmqContext = ZMQ.context(4);
+    private final ZMQ.Socket sender;
+    private final Charset CHARSET = Charset.forName("UTF-8");
+
     public ChatQueueHandler(FoxBukkitChat plugin) {
-        super(plugin.redisManager, "foxbukkit:to_server");
+        sender = zmqContext.socket(ZMQ.PUSH);
+        sender.connect(plugin.configuration.getValue("zmq-server-to-link", "tcp://127.0.0.1:5556"));
+
+        final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
+        receiver.connect(plugin.configuration.getValue("zmq-link-to-server", "tcp://127.0.0.1:5557"));
+        receiver.subscribe(new byte[] { '{' });
+
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                while(!Thread.currentThread().isInterrupted()) {
+                    onMessage(receiver.recvStr(CHARSET));
+                    System.out.println("SUB: " + System.nanoTime());
+                }
+            }
+        };
+        t.setDaemon(true);
+        t.setName("ZMQ SUB");
+        t.start();
+
         this.plugin = plugin;
     }
 
@@ -43,7 +67,8 @@ public class ChatQueueHandler extends AbstractRedisHandler {
         synchronized (gson) {
             messageJSON = gson.toJson(messageIn);
         }
-        plugin.redisManager.lpush("foxbukkit:from_server", messageJSON);
+        System.out.println("PUSH: " + System.nanoTime());
+        sender.send(messageJSON);
     }
 
     public void sendMessage(final CommandSender player, final String message, final String type) {
@@ -59,7 +84,6 @@ public class ChatQueueHandler extends AbstractRedisHandler {
 
     private static final Gson gson = new Gson();
 
-    @Override
     public void onMessage(final String c_message) {
         try {
             final ChatMessageOut chatMessageOut;
