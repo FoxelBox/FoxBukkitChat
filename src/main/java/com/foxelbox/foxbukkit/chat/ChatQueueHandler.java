@@ -33,11 +33,11 @@ public class ChatQueueHandler {
     private final Charset CHARSET = Charset.forName("UTF-8");
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
-        sender = zmqContext.socket(ZMQ.REQ);
-        sender.connect(plugin.configuration.getValue("zmq-server-to-link", "tcp://127.0.0.1:5556"));
+        sender = zmqContext.socket(ZMQ.PUB);
+        sender.connect(plugin.configuration.getValue("zmq-server-to-broker", "tcp://127.0.0.1:5556"));
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
-        receiver.connect(plugin.configuration.getValue("zmq-link-to-server", "tcp://127.0.0.1:5557"));
+        receiver.connect(plugin.configuration.getValue("zmq-broker-to-server", "tcp://127.0.0.1:5559"));
         receiver.subscribe(new byte[] { '{' });
 
         Thread t = new Thread() {
@@ -45,7 +45,6 @@ public class ChatQueueHandler {
             public void run() {
                 while(!Thread.currentThread().isInterrupted()) {
                     onMessage(receiver.recvStr(CHARSET));
-                    System.out.println("SUB: " + System.nanoTime());
                 }
             }
         };
@@ -67,11 +66,7 @@ public class ChatQueueHandler {
         synchronized (gson) {
             messageJSON = gson.toJson(messageIn);
         }
-        System.out.println("PUSH: " + System.nanoTime());
-        synchronized (sender) {
-            sender.send(messageJSON);
-            sender.recv();
-        }
+        sender.send(messageJSON);
     }
 
     public void sendMessage(final CommandSender player, final String message, final String type) {
