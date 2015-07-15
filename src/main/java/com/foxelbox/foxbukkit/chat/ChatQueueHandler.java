@@ -38,7 +38,7 @@ public class ChatQueueHandler {
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
         receiver.connect(plugin.configuration.getValue("zmq-broker-to-server", "tcp://127.0.0.1:5559"));
-        receiver.subscribe(new byte[] { 'C', 'M', 'O' });
+        receiver.subscribe("CMO".getBytes());
 
         Thread t = new Thread() {
             @Override
