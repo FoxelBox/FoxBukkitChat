@@ -33,7 +33,7 @@ public class ChatQueueHandler {
     private final Charset CHARSET = Charset.forName("UTF-8");
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
-        sender = zmqContext.socket(ZMQ.PUSH);
+        sender = zmqContext.socket(ZMQ.REQ);
         sender.connect(plugin.configuration.getValue("zmq-server-to-link", "tcp://127.0.0.1:5556"));
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
@@ -68,7 +68,10 @@ public class ChatQueueHandler {
             messageJSON = gson.toJson(messageIn);
         }
         System.out.println("PUSH: " + System.nanoTime());
-        sender.send(messageJSON);
+        synchronized (sender) {
+            sender.send(messageJSON);
+            sender.recv();
+        }
     }
 
     public void sendMessage(final CommandSender player, final String message, final String type) {
