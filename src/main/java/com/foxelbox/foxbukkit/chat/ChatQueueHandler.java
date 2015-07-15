@@ -31,7 +31,6 @@ public class ChatQueueHandler {
     private final ZMQ.Context zmqContext = ZMQ.context(4);
     private final ZMQ.Socket sender;
     private final Charset CHARSET = Charset.forName("UTF-8");
-    private static final byte[] CMI = "CMI".getBytes();
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
         sender = zmqContext.socket(ZMQ.PUSH);
