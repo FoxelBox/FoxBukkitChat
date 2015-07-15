@@ -38,12 +38,13 @@ public class ChatQueueHandler {
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
         receiver.connect(plugin.configuration.getValue("zmq-broker-to-server", "tcp://127.0.0.1:5559"));
-        receiver.subscribe(new byte[] { '{' });
+        receiver.subscribe(new byte[] { 'C', 'M', 'O' });
 
         Thread t = new Thread() {
             @Override
             public void run() {
                 while(!Thread.currentThread().isInterrupted()) {
+                    receiver.recv(); // Topic
                     onMessage(receiver.recvStr(CHARSET));
                 }
             }
