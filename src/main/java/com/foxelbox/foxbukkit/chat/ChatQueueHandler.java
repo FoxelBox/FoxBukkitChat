@@ -31,6 +31,7 @@ public class ChatQueueHandler {
     private final ZMQ.Context zmqContext = ZMQ.context(4);
     private final ZMQ.Socket sender;
     private final Charset CHARSET = Charset.forName("UTF-8");
+    private static final byte[] CMI = "CMI".getBytes();
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
         sender = zmqContext.socket(ZMQ.PUB);
@@ -67,7 +68,11 @@ public class ChatQueueHandler {
         synchronized (gson) {
             messageJSON = gson.toJson(messageIn);
         }
-        sender.send(messageJSON);
+
+        synchronized (sender) {
+            sender.send(CMI, ZMQ.SNDMORE);
+            sender.send(messageJSON);
+        }
     }
 
     public void sendMessage(final CommandSender player, final String message, final String type) {
