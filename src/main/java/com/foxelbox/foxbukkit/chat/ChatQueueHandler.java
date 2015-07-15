@@ -35,10 +35,10 @@ public class ChatQueueHandler {
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
         sender = zmqContext.socket(ZMQ.PUSH);
-        sender.connect(plugin.configuration.getValue("zmq-server-to-broker", "tcp://127.0.0.1:5556"));
+        ZeroMQConfigurator.parseZeroMQConfig(plugin.configuration.getValue("zmq-server-to-broker", ZeroMQConfigurator.getDefaultConfig("connect", 5556)), sender);
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
-        receiver.connect(plugin.configuration.getValue("zmq-broker-to-server", "tcp://127.0.0.1:5559"));
+        ZeroMQConfigurator.parseZeroMQConfig(plugin.configuration.getValue("zmq-broker-to-server", ZeroMQConfigurator.getDefaultConfig("connect", 5559)), receiver);
         receiver.subscribe("CMO".getBytes());
 
         Thread t = new Thread() {
