@@ -25,9 +25,9 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 
-public class RedisHandler extends AbstractRedisHandler {
+public class ChatQueueHandler extends AbstractRedisHandler {
     private final FoxBukkitChat plugin;
-    public RedisHandler(FoxBukkitChat plugin) {
+    public ChatQueueHandler(FoxBukkitChat plugin) {
         super(plugin.redisManager, "foxbukkit:to_server");
         this.plugin = plugin;
     }

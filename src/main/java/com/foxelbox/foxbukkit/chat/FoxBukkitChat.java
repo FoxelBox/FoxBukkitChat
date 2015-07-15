@@ -19,7 +19,6 @@ package com.foxelbox.foxbukkit.chat;
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.RedisManager;
 import com.foxelbox.dependencies.threading.SimpleThreadCreator;
-import com.foxelbox.foxbukkit.chat.html.S;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,7 +30,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,7 +42,7 @@ public class FoxBukkitChat extends JavaPlugin {
 
     public Configuration configuration;
     public RedisManager redisManager;
-    public RedisHandler redisHandler;
+    public ChatQueueHandler chatQueueHandler;
     public PlayerHelper playerHelper;
 
     public String getPlayerNick(Player ply) {
@@ -59,8 +57,8 @@ public class FoxBukkitChat extends JavaPlugin {
         return redisManager;
     }
 
-    public RedisHandler getRedisHandler() {
-        return redisHandler;
+    public ChatQueueHandler getChatQueueHandler() {
+        return chatQueueHandler;
     }
 
     private final HashSet<String> redisCommands = new HashSet<>();
@@ -88,7 +86,7 @@ public class FoxBukkitChat extends JavaPlugin {
         configuration = new Configuration(getDataFolder());
         redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
         playerHelper = new PlayerHelper(this);
-        redisHandler = new RedisHandler(this);
+        chatQueueHandler = new ChatQueueHandler(this);
 
         loadRedisCommands();
 
@@ -123,7 +121,7 @@ public class FoxBukkitChat extends JavaPlugin {
 
             if(redisCommands.contains(cmd)) {
                 event.setCancelled(true);
-                redisHandler.sendMessage(ply, "/" + cmd + " " + argStr);
+                chatQueueHandler.sendMessage(ply, "/" + cmd + " " + argStr);
             }
         }
 
@@ -132,7 +130,7 @@ public class FoxBukkitChat extends JavaPlugin {
             event.setCancelled(true);
             final String msg = event.getMessage();
             final Player ply = event.getPlayer();
-            redisHandler.sendMessage(ply, msg);
+            chatQueueHandler.sendMessage(ply, msg);
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
@@ -141,7 +139,7 @@ public class FoxBukkitChat extends JavaPlugin {
             playerHelper.refreshPlayerListRedis(null);
             event.setJoinMessage(null);
             if(registeredPlayers.add(event.getPlayer().getUniqueId())) {
-                redisHandler.sendMessage(event.getPlayer(), "join", "playerstate");
+                chatQueueHandler.sendMessage(event.getPlayer(), "join", "playerstate");
             }
         }
 
@@ -150,7 +148,7 @@ public class FoxBukkitChat extends JavaPlugin {
             playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setQuitMessage(null);
             if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
-                redisHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
+                chatQueueHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
             }
         }
 
@@ -159,7 +157,7 @@ public class FoxBukkitChat extends JavaPlugin {
             playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setLeaveMessage(null);
             if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
-                redisHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
+                chatQueueHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
             }
         }
     }
