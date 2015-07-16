@@ -30,7 +30,6 @@ public class ChatQueueHandler {
     private final FoxBukkitChat plugin;
     private final ZMQ.Context zmqContext = ZMQ.context(4);
     private final ZMQ.Socket sender;
-    private final Charset CHARSET = Charset.forName("UTF-8");
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
         sender = zmqContext.socket(ZMQ.PUSH);
@@ -45,7 +44,7 @@ public class ChatQueueHandler {
             public void run() {
                 while(!Thread.currentThread().isInterrupted()) {
                     receiver.recv(); // Topic
-                    onMessage(receiver.recvStr(CHARSET));
+                    onMessage(receiver.recv());
                 }
             }
         };
@@ -57,21 +56,17 @@ public class ChatQueueHandler {
     }
 
     public void sendMessage(final CommandSender player, final String message) {
-        sendMessage(player, message, "text");
+        sendMessage(player, message, Messages.MessageType.TEXT);
     }
 
     public void sendMessage(final ChatMessageIn messageIn) {
         if(messageIn == null)
             throw new NullPointerException();
-        final String messageJSON;
-        synchronized (gson) {
-            messageJSON = gson.toJson(messageIn);
-        }
 
-        sender.send(messageJSON);
+        sender.send(messageIn.toProtoBuf().toByteArray(), 0);
     }
 
-    public void sendMessage(final CommandSender player, final String message, final String type) {
+    public void sendMessage(final CommandSender player, final String message, final Messages.MessageType type) {
         if(player == null || message == null)
             throw new NullPointerException();
         ChatMessageIn messageIn = new ChatMessageIn(plugin, player);
@@ -82,15 +77,9 @@ public class ChatQueueHandler {
         sendMessage(messageIn);
     }
 
-    private static final Gson gson = new Gson();
-
-    public void onMessage(final String c_message) {
+    public void onMessage(final byte[] c_message) {
         try {
-            final ChatMessageOut chatMessageOut;
-            synchronized (gson) {
-                chatMessageOut = gson.fromJson(c_message, ChatMessageOut.class);
-            }
-
+            final ChatMessageOut chatMessageOut = ChatMessageOut.fromProtoBuf(Messages.ChatMessageOut.parseFrom(c_message));
             onMessage(chatMessageOut);
         }
         catch (Exception e) {
@@ -103,16 +92,16 @@ public class ChatQueueHandler {
             Collection<? extends Player> allPlayers = plugin.getServer().getOnlinePlayers();
             final List<Player> targetPlayers = new ArrayList<>();
             switch(chatMessageOut.to.type) {
-                case "all":
+                case ALL:
                     targetPlayers.addAll(allPlayers);
                     break;
-                case "permission":
+                case PERMISSION:
                     for(String permission : chatMessageOut.to.filter)
                         for (Player player : allPlayers)
                             if (player.hasPermission(permission) && !targetPlayers.contains(player))
                                 targetPlayers.add(player);
                     break;
-                case "player":
+                case PLAYER:
                     for(String playerUUID : chatMessageOut.to.filter)
                         for (Player player : allPlayers)
                             if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
@@ -120,7 +109,7 @@ public class ChatQueueHandler {
                     break;
             }
 
-            if(chatMessageOut.type.equals("kick")) {
+            if(chatMessageOut.type == Messages.MessageType.KICK) {
                 plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
                     @Override
                     public void run() {
@@ -132,7 +121,7 @@ public class ChatQueueHandler {
                     }
                 });
                 return;
-            } else if(chatMessageOut.type.equals("inject")) {
+            } else if(chatMessageOut.type == Messages.MessageType.INJECT) {
                 final String[] contents = chatMessageOut.contents.split("\n");
                 plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
                     @Override
@@ -145,7 +134,7 @@ public class ChatQueueHandler {
                     }
                 });
                 return;
-            } else if(!chatMessageOut.type.equals("text")) {
+            } else if(chatMessageOut.type != Messages.MessageType.TEXT) {
                 return;
             }
 

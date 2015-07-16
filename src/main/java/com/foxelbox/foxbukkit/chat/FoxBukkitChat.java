@@ -139,7 +139,7 @@ public class FoxBukkitChat extends JavaPlugin {
             playerHelper.refreshPlayerListRedis(null);
             event.setJoinMessage(null);
             if(registeredPlayers.add(event.getPlayer().getUniqueId())) {
-                chatQueueHandler.sendMessage(event.getPlayer(), "join", "playerstate");
+                chatQueueHandler.sendMessage(event.getPlayer(), "join", Messages.MessageType.PLAYERSTATE);
             }
         }
 
@@ -148,7 +148,7 @@ public class FoxBukkitChat extends JavaPlugin {
             playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setQuitMessage(null);
             if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
-                chatQueueHandler.sendMessage(event.getPlayer(), "quit", "playerstate");
+                chatQueueHandler.sendMessage(event.getPlayer(), "quit", Messages.MessageType.PLAYERSTATE);
             }
         }
 
@@ -157,7 +157,7 @@ public class FoxBukkitChat extends JavaPlugin {
             playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setLeaveMessage(null);
             if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
-                chatQueueHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), "playerstate");
+                chatQueueHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), Messages.MessageType.PLAYERSTATE);
             }
         }
     }

@@ -16,6 +16,9 @@
  */
 package com.foxelbox.foxbukkit.chat.json;
 
+import com.foxelbox.foxbukkit.chat.Messages;
+
+import java.util.List;
 import java.util.UUID;
 
 public class ChatMessageOut {
@@ -23,11 +26,69 @@ public class ChatMessageOut {
     public UserInfo from;
     public MessageTarget to;
 
-    public Long timestamp = System.currentTimeMillis() / 1000;
+    public long id = 0;
+    public long timestamp = System.currentTimeMillis() / 1000;
 
     public UUID context;
     public Boolean finalizeContext = false;
-    public String type = "text";
+    public Messages.MessageType type = Messages.MessageType.TEXT;
 
     public String contents;
+
+    public Messages.ChatMessageOut toProtoBuf() {
+        Messages.ChatMessageOut.Builder builder = Messages.ChatMessageOut.newBuilder();
+
+        if(server != null) {
+            builder.setServer(server);
+        }
+        if(from != null) {
+            builder.setFromUuid(from.uuid.toString());
+            builder.setFromName(from.name);
+        }
+        if(to != null) {
+            builder.setToType(to.type);
+            builder.clearToFilter();
+            for(String s : to.filter) {
+                builder.addToFilter(s);
+            }
+        }
+
+        builder.setId(id);
+        builder.setTimestamp(timestamp);
+
+        builder.setContext(context.toString());
+        if(!finalizeContext) {
+            builder.setFinalizeContext(false);
+        }
+        if(type != null && type != Messages.MessageType.TEXT) {
+            builder.setType(type);
+        }
+
+        if(contents != null) {
+            builder.setContents(contents);
+        }
+
+        return builder.build();
+    }
+
+    public static ChatMessageOut fromProtoBuf(Messages.ChatMessageOut message) {
+        ChatMessageOut ret = new ChatMessageOut();
+
+        ret.server = message.getServer();
+        ret.from = new UserInfo(UUID.fromString(message.getFromUuid()), message.getFromName());
+
+        List<String> filterTo = message.getToFilterList();
+        ret.to = new MessageTarget(message.getToType(), filterTo.toArray(new String[filterTo.size()]));
+
+        ret.id = message.getId();
+        ret.timestamp = message.getTimestamp();
+
+        ret.context = UUID.fromString(message.getContext());
+        ret.finalizeContext = message.getFinalizeContext();
+        ret.type = message.getType();
+
+        ret.contents = message.getContents();
+
+        return ret;
+    }
 }

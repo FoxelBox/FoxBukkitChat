@@ -17,6 +17,7 @@
 package com.foxelbox.foxbukkit.chat.json;
 
 import com.foxelbox.foxbukkit.chat.FoxBukkitChat;
+import com.foxelbox.foxbukkit.chat.Messages;
 import com.foxelbox.foxbukkit.chat.Utils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -38,13 +39,58 @@ public class ChatMessageIn {
         this.server = plugin.configuration.getValue("server-name", "Main");
     }
 
-    public String server;
+    private ChatMessageIn() {
 
+    }
+
+    public String server;
     public UserInfo from;
 
     public Long timestamp;
-    public UUID context;
 
-    public String type;
+    public UUID context;
+    public Messages.MessageType type;
+
     public String contents;
+
+    public Messages.ChatMessageIn toProtoBuf() {
+        Messages.ChatMessageIn.Builder builder = Messages.ChatMessageIn.newBuilder();
+
+        if(server != null) {
+            builder.setServer(server);
+        }
+        if(from != null) {
+            builder.setFromUuid(from.uuid.toString());
+            builder.setFromName(from.name);
+        }
+
+        builder.setTimestamp(timestamp);
+
+        builder.setContext(context.toString());
+        if(type != null && type != Messages.MessageType.TEXT) {
+            builder.setType(type);
+        }
+
+        if(contents != null) {
+            builder.setContents(contents);
+        }
+
+        return builder.build();
+    }
+
+    public static ChatMessageIn fromProtoBuf(Messages.ChatMessageIn message) {
+        ChatMessageIn ret = new ChatMessageIn();
+
+        ret.server = message.getServer();
+        ret.from = new UserInfo(UUID.fromString(message.getFromUuid()), message.getFromName());
+
+        ret.timestamp = message.getTimestamp();
+
+        ret.context = UUID.fromString(message.getContext());
+        ret.type = message.getType();
+
+        ret.contents = message.getContents();
+
+        return ret;
+    }
 }
