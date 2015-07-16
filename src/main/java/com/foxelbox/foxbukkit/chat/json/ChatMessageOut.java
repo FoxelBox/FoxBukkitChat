@@ -45,7 +45,7 @@ public class ChatMessageOut {
             builder.setFromUuid(from.uuid.toString());
             builder.setFromName(from.name);
         }
-        if(to != null) {
+        if(to != null && to.type != Messages.TargetType.ALL) {
             builder.setToType(to.type);
             builder.clearToFilter();
             for(String s : to.filter) {
