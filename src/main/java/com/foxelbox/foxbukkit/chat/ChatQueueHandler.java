@@ -18,12 +18,10 @@ package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
 import com.foxelbox.foxbukkit.chat.json.ChatMessageOut;
-import com.google.gson.Gson;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.zeromq.ZMQ;
 
-import java.nio.charset.Charset;
 import java.util.*;
 
 public class ChatQueueHandler {
