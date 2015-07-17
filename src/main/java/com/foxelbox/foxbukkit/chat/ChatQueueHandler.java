@@ -31,10 +31,20 @@ public class ChatQueueHandler {
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
         sender = zmqContext.socket(ZMQ.PUSH);
-        new ZeroMQConfigurator(sender, "fbchat-server2link", plugin.configuration.getValue("zmq-mdns-server2link", "default"));
+        ZeroMQConfigurator.parseZeroMQConfig(
+                plugin.configuration.getValue("zmq-server2link", "mdns;null"),
+                sender,
+                "fbchat-server2link",
+                plugin.configuration.getValue("zmq-mdns-server2link", "default")
+        );
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
-        new ZeroMQConfigurator(receiver, "fbchat-link2server", plugin.configuration.getValue("zmq-mdns-link2server", "default"));
+        ZeroMQConfigurator.parseZeroMQConfig(
+                plugin.configuration.getValue("zmq-link2server", "mdns;null"),
+                receiver,
+                "fbchat-link2server",
+                plugin.configuration.getValue("zmq-mdns-link2server", "default")
+        );
 
         receiver.subscribe("CMO".getBytes());
 
