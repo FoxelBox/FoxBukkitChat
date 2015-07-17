@@ -59,9 +59,6 @@ public class ZeroMQConfigurator {
     }
 
     public static String getDefaultConfig(String mode, int port) {
-        if(mode.equalsIgnoreCase("announce")) {
-            return mode + ";" + port;
-        }
         return mode + ";tcp://*:" + port;
     }
 
