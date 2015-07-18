@@ -87,21 +87,28 @@ public class ZeroMQConfigurator {
         }
     }
 
-    public static void announceService(String serviceType, String serviceName, int port) {
-        final String type = formatDNS(serviceType, serviceName);
-        try {
-            final ServiceInfo info = ServiceInfo.create(type, "n" + port, port, "me");
-            services.add(info);
-            jmDNS.registerService(info);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static void announceService(final String serviceType, final String serviceName, final int port) {
+        new Thread() {
+            public void run() {
+                final String type = formatDNS(serviceType, serviceName);
+                try {
+                    final ServiceInfo info = ServiceInfo.create(type, "n" + port + "-" + IDENDITY, port, "me");
+                    synchronized (services) {
+                        services.add(info);
+                    }
+                    jmDNS.registerService(info);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }.start();
     }
 
+    private static final String IDENDITY = UUID.randomUUID().toString();
     private static final JmDNS jmDNS;
     static {
         try {
-            jmDNS = JmDNS.create(InetAddress.getLocalHost(), UUID.randomUUID().toString());
+            jmDNS = JmDNS.create(InetAddress.getLocalHost(), IDENDITY);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
