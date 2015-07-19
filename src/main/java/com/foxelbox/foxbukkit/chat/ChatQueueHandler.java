@@ -105,7 +105,9 @@ public class ChatQueueHandler {
         synchronized (messageQueue) {
             messageQueue.add(messageIn.toProtoBuf().toByteArray());
         }
-        senderThread.notify();
+        synchronized (senderThread) {
+            senderThread.notify();
+        }
     }
 
     public void sendMessage(final CommandSender player, final String message, final Messages.MessageType type) {
