@@ -88,7 +88,11 @@ public class ChatQueueHandler {
                         }
                         continue;
                     }
-                    sender.send(message, 0);
+                    try {
+                        sender.send(message, 0);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };
