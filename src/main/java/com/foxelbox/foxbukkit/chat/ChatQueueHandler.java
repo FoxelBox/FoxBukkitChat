@@ -23,11 +23,16 @@ import org.bukkit.entity.Player;
 import org.zeromq.ZMQ;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ChatQueueHandler {
     private final FoxBukkitChat plugin;
     private final ZMQ.Context zmqContext = ZMQ.context(4);
+
     private final ZMQ.Socket sender;
+    private final Thread senderThread;
+
+    private final Queue<byte[]> messageQueue = new LinkedBlockingQueue<>();
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
         sender = zmqContext.socket(ZMQ.PUSH);
@@ -61,6 +66,30 @@ public class ChatQueueHandler {
         t.setName("ZMQ SUB");
         t.start();
 
+        senderThread = new Thread() {
+            @Override
+            public void run() {
+                while(!Thread.currentThread().isInterrupted()) {
+                    final byte[] message;
+                    synchronized (messageQueue) {
+                        message = messageQueue.poll();
+                    }
+                    if(message == null) {
+                        try {
+                            wait();
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                        continue;
+                    }
+                    sender.send(message, 0);
+                }
+            }
+        };
+        senderThread.setDaemon(true);
+        senderThread.setName("ZMQ PUSH");
+        senderThread.start();
+
         this.plugin = plugin;
     }
 
@@ -69,10 +98,14 @@ public class ChatQueueHandler {
     }
 
     public void sendMessage(final ChatMessageIn messageIn) {
-        if(messageIn == null)
+        if(messageIn == null) {
             throw new NullPointerException();
+        }
 
-        sender.send(messageIn.toProtoBuf().toByteArray(), 0);
+        synchronized (messageQueue) {
+            messageQueue.add(messageIn.toProtoBuf().toByteArray());
+        }
+        senderThread.notify();
     }
 
     public void sendMessage(final CommandSender player, final String message, final Messages.MessageType type) {
