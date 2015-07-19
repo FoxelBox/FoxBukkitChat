@@ -36,6 +36,9 @@ public class ChatQueueHandler {
 
     public ChatQueueHandler(FoxBukkitChat plugin) {
         sender = zmqContext.socket(ZMQ.PUSH);
+        sender.setSendTimeOut(5000);
+        sender.setImmediate(true);
+        sender.setLinger(0);
         ZeroMQConfigurator.parseZeroMQConfig(
                 plugin.configuration.getValue("zmq-server2link", "mdns;null"),
                 sender,
@@ -44,6 +47,7 @@ public class ChatQueueHandler {
         );
 
         final ZMQ.Socket receiver = zmqContext.socket(ZMQ.SUB);
+        receiver.setLinger(0);
         ZeroMQConfigurator.parseZeroMQConfig(
                 plugin.configuration.getValue("zmq-link2server", "mdns;null"),
                 receiver,
