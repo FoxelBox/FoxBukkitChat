@@ -208,13 +208,10 @@ public class ChatQueueHandler {
                 return;
             }
 
-            if (chatMessageOut.server != null && !chatMessageOut.server.equals(plugin.configuration.getValue("server-name", "Main"))) {
-                if(chatMessageOut.contents != null) {
+            if(chatMessageOut.contents != null && !chatMessageOut.contents.isEmpty()) {
+                if (chatMessageOut.server != null && !chatMessageOut.server.isEmpty() && !chatMessageOut.server.equals(plugin.configuration.getValue("server-name", "Main"))) {
                     chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
                 }
-            }
-
-            if(chatMessageOut.contents != null) {
                 HTMLParser.sendToPlayers(plugin, targetPlayers, chatMessageOut.contents);
             }
         }
