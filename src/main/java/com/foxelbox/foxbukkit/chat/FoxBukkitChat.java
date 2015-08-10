@@ -19,6 +19,12 @@ package com.foxelbox.foxbukkit.chat;
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.RedisManager;
 import com.foxelbox.dependencies.threading.SimpleThreadCreator;
+import net.minecraft.server.v1_8_R3.PlayerConnection;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -32,10 +38,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Filter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class FoxBukkitChat extends JavaPlugin {
@@ -87,6 +89,8 @@ public class FoxBukkitChat extends JavaPlugin {
     public void onEnable() {
         super.onEnable();
 
+        attachFilterTo((Logger) LogManager.getLogger(PlayerConnection.class));
+
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
         redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
@@ -106,35 +110,27 @@ public class FoxBukkitChat extends JavaPlugin {
                 return true;
             }
         });
-
-        attachFilterTo(this.getServer().getLogger());
     }
 
     private static void attachFilterTo(Logger logger) {
-        logger.setFilter(new FBLogFilter(logger.getFilter()));
+        logger.addFilter(new FBLogFilter());
     }
 
-    private static final Pattern PM_PATTERN = Pattern.compile("^[^ ]+ issued server command: /(pm|msg|conv)( |$)");
+    private static final Pattern PM_PATTERN = Pattern.compile("^[^ ]+ issued server command: /(pm|msg|conv|tell)( .*)?$");
 
-    static class FBLogFilter implements Filter {
-        private final Filter parentFilter;
-
-        public FBLogFilter(Filter parentFilter) {
-            this.parentFilter = parentFilter;
-        }
-
+    static class FBLogFilter extends AbstractFilter {
         @Override
-        public boolean isLoggable(LogRecord record) {
-            if(parentFilter != null && !parentFilter.isLoggable(record)) {
-                return false;
+        public Result filter(LogEvent logEvent) {
+            if(logEvent.getLevel() != Level.INFO) {
+                return Result.NEUTRAL;
             }
 
-            if(record.getLevel() != Level.INFO) {
-                return true;
+            final String msg = logEvent.getMessage().getFormattedMessage().toLowerCase();
+            if(PM_PATTERN.matcher(msg).matches()) {
+                return Result.DENY;
             }
 
-            final String msg = record.getMessage().toLowerCase();
-            return !PM_PATTERN.matcher(msg).matches();
+            return Result.NEUTRAL;
         }
     }
 
