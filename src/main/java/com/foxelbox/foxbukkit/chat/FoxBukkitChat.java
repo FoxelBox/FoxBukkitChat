@@ -32,6 +32,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Filter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class FoxBukkitChat extends JavaPlugin {
     public FoxBukkitChat() {
@@ -101,6 +106,36 @@ public class FoxBukkitChat extends JavaPlugin {
                 return true;
             }
         });
+
+        attachFilterTo(this.getServer().getLogger());
+    }
+
+    private static void attachFilterTo(Logger logger) {
+        logger.setFilter(new FBLogFilter(logger.getFilter()));
+    }
+
+    private static final Pattern PM_PATTERN = Pattern.compile("^[^ ]+ issued server command: /(pm|msg|conv)( |$)");
+
+    static class FBLogFilter implements Filter {
+        private final Filter parentFilter;
+
+        public FBLogFilter(Filter parentFilter) {
+            this.parentFilter = parentFilter;
+        }
+
+        @Override
+        public boolean isLoggable(LogRecord record) {
+            if(parentFilter != null && !parentFilter.isLoggable(record)) {
+                return false;
+            }
+
+            if(record.getLevel() != Level.INFO) {
+                return true;
+            }
+
+            final String msg = record.getMessage().toLowerCase();
+            return !PM_PATTERN.matcher(msg).matches();
+        }
     }
 
     class FBChatListener implements Listener {
