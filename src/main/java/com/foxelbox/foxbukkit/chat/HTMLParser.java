@@ -17,8 +17,8 @@
 package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.foxbukkit.chat.html.Element;
-import net.minecraft.server.v1_8_R3.ChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_7_R4.ChatBaseComponent;
+import net.minecraft.server.v1_7_R4.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -30,6 +30,7 @@ import javax.xml.bind.UnmarshallerHandler;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 public class HTMLParser {
     static class WhitespaceAwareUnmarshallerHandler implements ContentHandler {
@@ -109,7 +110,7 @@ public class HTMLParser {
     }
 
     public static boolean sendToAll(FoxBukkitChat plugin, String format) {
-        return sendToPlayers(plugin, plugin.getServer().getOnlinePlayers(), format);
+        return sendToPlayers(plugin, Arrays.asList(plugin.getServer().getOnlinePlayers()), format);
     }
 
     public static boolean sendToPlayers(FoxBukkitChat plugin, Collection<? extends CommandSender> targetPlayers, String format) {

@@ -17,7 +17,7 @@
 package com.foxelbox.foxbukkit.chat.html;
 
 import com.foxelbox.foxbukkit.chat.HTMLParser;
-import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_7_R4.*;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -65,7 +65,7 @@ public abstract class Element {
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
-            final ChatClickable.EnumClickAction enumClickAction = ChatClickable.EnumClickAction.a(eventType.toLowerCase());
+            final EnumClickAction enumClickAction = EnumClickAction.a(eventType.toLowerCase());
             if (enumClickAction == null) {
                 throw new RuntimeException("Unknown click action "+eventType);
             }
@@ -81,12 +81,12 @@ public abstract class Element {
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
-            final ChatHoverable.EnumHoverAction enumClickAction = ChatHoverable.EnumHoverAction.a(eventType.toLowerCase());
+            final EnumHoverAction enumClickAction = EnumHoverAction.a(eventType.toLowerCase());
             if (enumClickAction == null) {
                 throw new RuntimeException("Unknown click action "+eventType);
             }
 
-            style.setChatHoverable(new ChatHoverable(enumClickAction, HTMLParser.parse(eventString)));
+            style.a(new ChatHoverable(enumClickAction, HTMLParser.parse(eventString)));
         }
 
         final List<ChatBaseComponent> components = new ArrayList<>();

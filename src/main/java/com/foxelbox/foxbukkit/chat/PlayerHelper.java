@@ -17,8 +17,8 @@
 package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.dependencies.redis.CacheMap;
-import net.minecraft.server.v1_8_R3.Packet;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import net.minecraft.server.v1_7_R4.Packet;
+import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -78,7 +78,7 @@ public class PlayerHelper {
     }
 
     public void refreshPlayerListRedis(Player ignoreMe) {
-        Collection<? extends Player> players = plugin.getServer().getOnlinePlayers();
+        Collection<? extends Player> players = Arrays.asList(plugin.getServer().getOnlinePlayers());
         final String keyName = "playersOnline:" + plugin.configuration.getValue("server-name", "Main");
         plugin.redisManager.del(keyName);
         for(Player ply : players) {

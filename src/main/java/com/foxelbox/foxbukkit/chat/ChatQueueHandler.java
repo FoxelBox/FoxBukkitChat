@@ -143,7 +143,7 @@ public class ChatQueueHandler {
 
     public void onMessage(final ChatMessageOut chatMessageOut) {
         try {
-            Collection<? extends Player> allPlayers = plugin.getServer().getOnlinePlayers();
+            Collection<? extends Player> allPlayers = Arrays.asList(plugin.getServer().getOnlinePlayers());
             final List<Player> targetPlayers = new ArrayList<>();
             switch(chatMessageOut.to.type) {
                 case ALL:

@@ -19,7 +19,7 @@ package com.foxelbox.foxbukkit.chat;
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.dependencies.redis.RedisManager;
 import com.foxelbox.dependencies.threading.SimpleThreadCreator;
-import net.minecraft.server.v1_8_R3.PlayerConnection;
+import net.minecraft.server.v1_7_R4.PlayerConnection;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;

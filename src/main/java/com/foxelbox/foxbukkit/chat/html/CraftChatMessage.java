@@ -18,7 +18,7 @@ package com.foxelbox.foxbukkit.chat.html;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import net.minecraft.server.v1_8_R3.*;
+import net.minecraft.server.v1_7_R4.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +87,7 @@ public final class CraftChatMessage {
                             case UNDERLINE:
                                 modifier.setUnderline(Boolean.TRUE);
                                 break;
-                            case OBFUSCATED:
+                            case RANDOM:
                                 modifier.setRandom(Boolean.TRUE);
                                 break;
                             default:
@@ -134,7 +134,7 @@ public final class CraftChatMessage {
                     appendNewComponent();
                 }
                 builder.append(fullUrl);
-                ChatClickable link = new ChatClickable(ChatClickable.EnumClickAction.OPEN_URL,
+                ChatClickable link = new ChatClickable(EnumClickAction.OPEN_URL,
                         (protocol!=null?protocol:"http") + "://" + url + (path!=null?path:""));
                 modifier.setChatClickable(link);
                 appendNewComponent();
