@@ -17,8 +17,8 @@
 package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.foxbukkit.chat.html.Element;
-import net.minecraft.server.v1_8_R3.ChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_9_R1.ChatBaseComponent;
+import net.minecraft.server.v1_9_R1.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

@@ -17,8 +17,8 @@
 package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.dependencies.redis.CacheMap;
-import net.minecraft.server.v1_8_R3.Packet;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import net.minecraft.server.v1_9_R1.Packet;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
