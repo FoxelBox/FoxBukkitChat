@@ -18,7 +18,7 @@ package com.foxelbox.foxbukkit.chat.html;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import net.minecraft.server.v1_10_R1.*;
+import net.minecraft.server.v1_11_R1.*;
 
 import java.util.ArrayList;
 import java.util.List;

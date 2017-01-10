@@ -17,7 +17,7 @@
 package com.foxelbox.foxbukkit.chat.html;
 
 import com.foxelbox.foxbukkit.chat.HTMLParser;
-import net.minecraft.server.v1_10_R1.*;
+import net.minecraft.server.v1_11_R1.*;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElementRef;
