@@ -22,9 +22,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.xml.sax.*;
-import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshallerHandler;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.StringReader;
@@ -68,6 +69,20 @@ public class HTMLParser {
         public void startPrefixMapping( String prefix, String uri ) throws SAXException { uh.startPrefixMapping( prefix, uri ); }
     }
 
+    private static final SAXParserFactory saxParserFactory;
+    private static final JAXBContext jaxbContext;
+    static {
+        try {
+            ClassLoader old = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(HTMLParser.class.getClassLoader());
+            jaxbContext = JAXBContext.newInstance(Element.class);
+            Thread.currentThread().setContextClassLoader(old);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+        saxParserFactory = SAXParserFactory.newDefaultInstance();
+    }
+
     /*
      * ChatComponentText = TextComponent
      * ChatMessage = TranslatableComponent
@@ -86,21 +101,25 @@ public class HTMLParser {
         return out;
     }
 
+    private static XMLReader getXMLReader() throws Exception {
+        return saxParserFactory.newSAXParser().getXMLReader();
+    }
+
     @SuppressWarnings( "unchecked" )
-    private static <T> T unmarshal(JAXBContext ctx, String strData, boolean flgWhitespaceAware) throws Exception {
-        UnmarshallerHandler uh = ctx.createUnmarshaller().getUnmarshallerHandler();
-        XMLReader xr = SAXParserFactory.newDefaultInstance().newSAXParser().getXMLReader();
-        xr.setContentHandler( flgWhitespaceAware ? new WhitespaceAwareUnmarshallerHandler( uh ) : uh );
-        xr.parse( new InputSource( new StringReader( strData ) ) );
+    private static <T> T unmarshal(String strData, boolean flgWhitespaceAware) throws Exception {
+        final UnmarshallerHandler uh;
+        synchronized (jaxbContext) {
+            uh = jaxbContext.createUnmarshaller().getUnmarshallerHandler();
+            XMLReader xr = getXMLReader();
+            xr.setContentHandler(flgWhitespaceAware ? new WhitespaceAwareUnmarshallerHandler(uh) : uh);
+            xr.parse(new InputSource(new StringReader(strData)));
+        }
         return (T)uh.getResult();
     }
 
     public static BaseComponent parse(String xmlSource) throws Exception {
         xmlSource = "<span>" + xmlSource + "</span>";
-
-        final JAXBContext jaxbContext = JAXBContext.newInstance(Element.class);
-        final Element element = unmarshal(jaxbContext, xmlSource, true);
-
+        final Element element = unmarshal(xmlSource, true);
         return element.getDefaultNmsComponent();
     }
 

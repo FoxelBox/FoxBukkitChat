@@ -65,10 +65,7 @@ public abstract class Element {
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
-            final ClickEvent.Action enumClickAction = ClickEvent.Action.valueOf(eventType.toLowerCase());
-            if (enumClickAction == null) {
-                throw new RuntimeException("Unknown click action " + eventType);
-            }
+            final ClickEvent.Action enumClickAction = ClickEvent.Action.valueOf(eventType.toUpperCase());
 
             style.setClickEvent(new ClickEvent(enumClickAction, eventString));
         }
@@ -81,10 +78,7 @@ public abstract class Element {
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
-            final HoverEvent.Action enumClickAction = HoverEvent.Action.valueOf(eventType.toLowerCase());
-            if (enumClickAction == null) {
-                throw new RuntimeException("Unknown click action " + eventType);
-            }
+            final HoverEvent.Action enumClickAction = HoverEvent.Action.valueOf(eventType.toUpperCase());
 
             style.setHoverEvent(new HoverEvent(enumClickAction, new BaseComponent[] { HTMLParser.parse(eventString) }));
         }

@@ -38,12 +38,12 @@ public class PlayerHelper {
 
     public PlayerHelper(FoxBukkitChat plugin) {
         this.plugin = plugin;
-        playerNameToUUID = new Configuration(plugin.getDataFolder(), "playerNameToUUID");
-        playerUUIDToName = new Configuration(plugin.getDataFolder(), "playerUUIDToName");
-        playerNicks = new Configuration(plugin.getDataFolder(), "playernicks");
+        playerNameToUUID = new Configuration(plugin.getDataFolder(), "playerNameToUUID.txt");
+        playerUUIDToName = new Configuration(plugin.getDataFolder(), "playerUUIDToName.txt");
+        playerNicks = new Configuration(plugin.getDataFolder(), "playernicks.txt");
         ignoreCache = new HashMap<>();
 
-        Configuration ignoredByListC = new Configuration(plugin.getDataFolder(), "ignoredByList");
+        Configuration ignoredByListC = new Configuration(plugin.getDataFolder(), "ignoredByList.txt");
         ignoredByListC.addOnChangeHook((key, value) -> {
             synchronized (ignoreCache) {
                 putIgnoreCache(UUID.fromString(key), value);

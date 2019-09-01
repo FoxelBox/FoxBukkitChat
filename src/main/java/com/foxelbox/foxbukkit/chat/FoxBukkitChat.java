@@ -18,8 +18,6 @@ package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
-import com.foxelbox.foxbukkit.chat.json.ChatMessageOut;
-import com.foxelbox.foxbukkit.chat.json.UserInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,7 +30,11 @@ import java.util.UUID;
 
 public class FoxBukkitChat extends JavaPlugin {
     public FoxBukkitChat() {
-
+        try {
+            Class.forName("com.sun.xml.bind.v2.ContextFactory");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     HashSet<UUID> registeredPlayers = new HashSet<>();
@@ -94,9 +96,7 @@ public class FoxBukkitChat extends JavaPlugin {
             final String msg = event.getMessage();
             final Player ply = event.getPlayer();
 
-            ChatMessageIn cmsg = new ChatMessageIn(FoxBukkitChat.this, ply);
-            cmsg.contents = msg;
-            chatHelper.sendMessage(cmsg);
+            chatHelper.sendMessage(formatHandler.generateText(ply.getUniqueId(), msg));
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
