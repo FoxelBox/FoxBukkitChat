@@ -17,7 +17,7 @@
 package com.foxelbox.foxbukkit.chat.html;
 
 import com.foxelbox.foxbukkit.chat.HTMLParser;
-import net.minecraft.server.v1_11_R1.*;
+import net.md_5.bungee.api.chat.*;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -51,10 +51,10 @@ public abstract class Element {
     @XmlMixed
     private List<Object> mixedContent = new ArrayList<>();
 
-    protected abstract void modifyStyle(ChatModifier style);
+    protected abstract void modifyStyle(BaseComponent style);
 
     private static final Pattern FUNCTION_PATTERN = Pattern.compile("^([^(]+)\\('(.*)'\\)$");
-    public List<ChatBaseComponent> getNmsComponents(ChatModifier style, boolean condenseElements) throws Exception {
+    public List<BaseComponent> getNmsComponents(BaseComponent style, boolean condenseElements) throws Exception {
         modifyStyle(style);
 
         if (onClick != null) {
@@ -65,12 +65,12 @@ public abstract class Element {
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
-            final ChatClickable.EnumClickAction enumClickAction = ChatClickable.EnumClickAction.a(eventType.toLowerCase());
+            final ClickEvent.Action enumClickAction = ClickEvent.Action.valueOf(eventType.toLowerCase());
             if (enumClickAction == null) {
-                throw new RuntimeException("Unknown click action "+eventType);
+                throw new RuntimeException("Unknown click action " + eventType);
             }
 
-            style.setChatClickable(new ChatClickable(enumClickAction, eventString));
+            style.setClickEvent(new ClickEvent(enumClickAction, eventString));
         }
 
         if (onHover != null) {
@@ -81,30 +81,30 @@ public abstract class Element {
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
-            final ChatHoverable.EnumHoverAction enumClickAction = ChatHoverable.EnumHoverAction.a(eventType.toLowerCase());
+            final HoverEvent.Action enumClickAction = HoverEvent.Action.valueOf(eventType.toLowerCase());
             if (enumClickAction == null) {
-                throw new RuntimeException("Unknown click action "+eventType);
+                throw new RuntimeException("Unknown click action " + eventType);
             }
 
-            style.setChatHoverable(new ChatHoverable(enumClickAction, HTMLParser.parse(eventString)));
+            style.setHoverEvent(new HoverEvent(enumClickAction, new BaseComponent[] { HTMLParser.parse(eventString) }));
         }
 
-        final List<ChatBaseComponent> components = new ArrayList<>();
+        final List<BaseComponent> components = new ArrayList<>();
         if (!condenseElements)
             mixedContent.add(0, "");
         for (Object o : mixedContent) {
             if (o instanceof String) {
-                for (IChatBaseComponent baseComponent : CraftChatMessage.fromString(((String)o).replace('\u000B', ' '), style.clone())) {
-                    components.add((ChatBaseComponent) baseComponent);
+                for (BaseComponent baseComponent : CraftChatMessage.fromString(((String)o).replace('\u000B', ' '), style.duplicate())) {
+                    components.add((BaseComponent) baseComponent);
                 }
             }
             else if (o instanceof Element) {
                 final Element element = (Element) o;
                 if (condenseElements) {
-                    components.add(element.getNmsComponent(style.clone()));
+                    components.add(element.getNmsComponent(style.duplicate()));
                 }
                 else {
-                    components.addAll(element.getNmsComponents(style.clone(), false));
+                    components.addAll(element.getNmsComponents(style.duplicate(), false));
                 }
             }
             else {
@@ -115,11 +115,11 @@ public abstract class Element {
         return components;
     }
 
-    public ChatBaseComponent getDefaultNmsComponent() throws Exception {
-        return getNmsComponent(new ChatModifier());
+    public BaseComponent getDefaultNmsComponent() throws Exception {
+        return getNmsComponent(new TextComponent());
     }
 
-    public ChatBaseComponent getNmsComponent(ChatModifier style) throws Exception {
+    public BaseComponent getNmsComponent(BaseComponent style) throws Exception {
         return condense(getNmsComponents(style, false));
     }
 
@@ -127,7 +127,7 @@ public abstract class Element {
     static {
         try {
             Field _ChatBaseComponent_listChildren = null;
-            for(Field field : ChatBaseComponent.class.getDeclaredFields()) {
+            for(Field field : BaseComponent.class.getDeclaredFields()) {
                 if(field.getType().equals(List.class)) {
                     _ChatBaseComponent_listChildren = field;
                     break;
@@ -142,14 +142,14 @@ public abstract class Element {
         }
     }
 
-    private static ChatBaseComponent condense(List<ChatBaseComponent> components) {
+    private static BaseComponent condense(List<BaseComponent> components) {
         if (components.isEmpty()) {
             return null;
         }
 
         components = new ArrayList<>(components);
 
-        final ChatBaseComponent head = components.remove(0);
+        final BaseComponent head = components.remove(0);
 
         if (!components.isEmpty()) {
             try {

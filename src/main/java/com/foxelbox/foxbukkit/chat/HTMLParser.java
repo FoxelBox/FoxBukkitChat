@@ -17,8 +17,7 @@
 package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.foxbukkit.chat.html.Element;
-import net.minecraft.server.v1_11_R1.ChatBaseComponent;
-import net.minecraft.server.v1_11_R1.PacketPlayOutChat;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -27,6 +26,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.UnmarshallerHandler;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,7 +76,7 @@ public class HTMLParser {
      * ChatHoverable = HoverEvent
      */
     public static String formatParams(String xmlSource, String... params) {
-        return String.format(xmlSource, xmlEscapeArray(params));
+        return String.format(xmlSource, (Object[])xmlEscapeArray(params));
     }
 
     private static String[] xmlEscapeArray(String[] in) {
@@ -89,13 +89,13 @@ public class HTMLParser {
     @SuppressWarnings( "unchecked" )
     private static <T> T unmarshal(JAXBContext ctx, String strData, boolean flgWhitespaceAware) throws Exception {
         UnmarshallerHandler uh = ctx.createUnmarshaller().getUnmarshallerHandler();
-        XMLReader xr = XMLReaderFactory.createXMLReader();
+        XMLReader xr = SAXParserFactory.newDefaultInstance().newSAXParser().getXMLReader();
         xr.setContentHandler( flgWhitespaceAware ? new WhitespaceAwareUnmarshallerHandler( uh ) : uh );
         xr.parse( new InputSource( new StringReader( strData ) ) );
         return (T)uh.getResult();
     }
 
-    public static ChatBaseComponent parse(String xmlSource) throws Exception {
+    public static BaseComponent parse(String xmlSource) throws Exception {
         xmlSource = "<span>" + xmlSource + "</span>";
 
         final JAXBContext jaxbContext = JAXBContext.newInstance(Element.class);
@@ -104,7 +104,7 @@ public class HTMLParser {
         return element.getDefaultNmsComponent();
     }
 
-    public static ChatBaseComponent format(String format) throws Exception {
+    public static BaseComponent format(String format) throws Exception {
         return parse(format);
     }
 
@@ -114,7 +114,7 @@ public class HTMLParser {
 
     public static boolean sendToPlayers(FoxBukkitChat plugin, Collection<? extends CommandSender> targetPlayers, String format) {
         try {
-            final PacketPlayOutChat packet = createChatPacket(format);
+            final BaseComponent packet = format(format);
 
             for (CommandSender commandSender : targetPlayers) {
                 if (!(commandSender instanceof Player)) {
@@ -122,7 +122,7 @@ public class HTMLParser {
                     continue;
                 }
 
-                plugin.playerHelper.sendPacketToPlayer((Player) commandSender, packet);
+                ((Player)commandSender).spigot().sendMessage(packet);
             }
 
             return true;
@@ -138,8 +138,7 @@ public class HTMLParser {
 
     public static boolean sendToPlayer(FoxBukkitChat plugin, Player player, String format) {
         try {
-            plugin.playerHelper.sendPacketToPlayer(player, createChatPacket(format));
-
+            player.spigot().sendMessage(format(format));
             return true;
         } catch (Exception e) {
             System.out.println("ERROR ON MESSAGE: " + format);
@@ -160,10 +159,6 @@ public class HTMLParser {
 
     private static String parsePlain(String format) {
         return format; // TODO: strip XML tags
-    }
-
-    private static PacketPlayOutChat createChatPacket(String format) throws Exception {
-        return new PacketPlayOutChat(format(format));
     }
 
     public static String escape(String s) {

@@ -16,12 +16,23 @@
  */
 package com.foxelbox.foxbukkit.chat.json;
 
+import com.foxelbox.foxbukkit.chat.FoxBukkitChat;
+import org.bukkit.entity.Player;
+
 import java.util.UUID;
 
 public class UserInfo {
     public UserInfo(UUID uuid, String name) {
         this.uuid = uuid;
         this.name = name;
+    }
+
+    public UserInfo(FoxBukkitChat plugin, UUID ply) {
+        this(ply, plugin.formatHandler.formatPlayerName(ply));
+    }
+
+    public UserInfo(FoxBukkitChat plugin, Player ply) {
+        this(plugin, ply.getUniqueId());
     }
 
     public UUID uuid;

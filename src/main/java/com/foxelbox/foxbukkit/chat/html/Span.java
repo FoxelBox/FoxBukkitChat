@@ -16,12 +16,12 @@
  */
 package com.foxelbox.foxbukkit.chat.html;
 
-import net.minecraft.server.v1_11_R1.ChatModifier;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Span extends Element {
     @Override
-    protected void modifyStyle(ChatModifier style) { }
+    protected void modifyStyle(BaseComponent style) { }
 }

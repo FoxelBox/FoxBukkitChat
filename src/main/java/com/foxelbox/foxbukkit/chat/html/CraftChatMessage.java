@@ -16,64 +16,59 @@
  */
 package com.foxelbox.foxbukkit.chat.html;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-import net.minecraft.server.v1_11_R1.*;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class CraftChatMessage {
     private static class FromString {
-        private static final Map<Character, EnumChatFormat> formatMap;
-
-        static {
-            Builder<Character, EnumChatFormat> builder = ImmutableMap.builder();
-            for (EnumChatFormat format : EnumChatFormat.values()) {
-                builder.put(format.toString().charAt(1), format);
-            }
-            formatMap = builder.build();
+        public static boolean IsColor(ChatColor cc) {
+            char c = cc.toString().charAt(1);
+            return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9');
         }
 
-        private final List<IChatBaseComponent> list = new ArrayList<>();
-        private IChatBaseComponent currentChatComponent = new ChatComponentText("");
-        private ChatModifier defaultModifier;
-        private ChatModifier modifier = new ChatModifier();
+        private final List<BaseComponent> list = new ArrayList<>();
+        private BaseComponent currentChatComponent = new TextComponent("");
+        private BaseComponent defaultModifier;
+        private BaseComponent modifier = new TextComponent();
         private StringBuilder builder = new StringBuilder();
-        private final IChatBaseComponent[] output;
+        private final BaseComponent[] output;
         private static final Pattern url = Pattern.compile("^(\u00A7.)*?((?:(https?)://)?([-\\w_\\.]{2,}\\.[a-z]{2,4})(/\\S*?)?)(\u00A7.)*?$");
         private int lastWord = 0;
 
         private FromString(String message) {
-            this(message, new ChatModifier());
+            this(message, new TextComponent(""));
         }
 
-        private FromString(String message, ChatModifier style) {
-            modifier = (defaultModifier = style).clone();
+        private FromString(String message, BaseComponent style) {
+            modifier = (defaultModifier = style).duplicate();
             if (message == null) {
-                output = new IChatBaseComponent[] { currentChatComponent };
+                output = new BaseComponent[] { currentChatComponent };
                 return;
             }
             list.add(currentChatComponent);
 
-            EnumChatFormat format = null;
+            ChatColor format = null;
             Matcher matcher = url.matcher(message);
             lastWord = 0;
 
             for (int i = 0; i < message.length(); i++) {
                 char currentChar = message.charAt(i);
-                if (currentChar == '\u00A7' && (i < (message.length() - 1)) && (format = formatMap.get(message.charAt(i + 1))) != null) {
+                if (currentChar == '\u00A7' && (i < (message.length() - 1)) && (format = ChatColor.getByChar(message.charAt(i + 1))) != null) {
                     checkUrl(matcher, message, i, false);
                     if (builder.length() > 0) {
                         appendNewComponent();
                     }
 
-                    if (format == EnumChatFormat.RESET) {
-                        modifier = defaultModifier.clone();
-                    } else if (format.isFormat()) {
+                    if (format == ChatColor.RESET) {
+                        modifier = defaultModifier.duplicate();
+                    } else if (IsColor(format)) {
                         switch (format) {
                             case BOLD:
                                 modifier.setBold(Boolean.TRUE);
@@ -85,16 +80,17 @@ public final class CraftChatMessage {
                                 modifier.setStrikethrough(Boolean.TRUE);
                                 break;
                             case UNDERLINE:
-                                modifier.setUnderline(Boolean.TRUE);
+                                modifier.setUnderlined(Boolean.TRUE);
                                 break;
-                            case OBFUSCATED:
-                                modifier.setRandom(Boolean.TRUE);
+                            case MAGIC:
+                                modifier.setObfuscated(Boolean.TRUE);
                                 break;
                             default:
                                 throw new AssertionError("Unexpected message format");
                         }
                     } else { // Color resets formatting
-                        modifier = defaultModifier.clone().setColor(format);
+                        modifier = defaultModifier.duplicate();
+                        modifier.setColor(format);
                     }
                     i++;
                 } else if (currentChar == '\n') {
@@ -116,7 +112,7 @@ public final class CraftChatMessage {
                 appendNewComponent();
             }
 
-            output = list.toArray(new IChatBaseComponent[0]);
+            output = list.toArray(new BaseComponent[0]);
         }
 
         private boolean checkUrl(Matcher matcher, String message, int i, boolean newWord) {
@@ -134,11 +130,11 @@ public final class CraftChatMessage {
                     appendNewComponent();
                 }
                 builder.append(fullUrl);
-                ChatClickable link = new ChatClickable(ChatClickable.EnumClickAction.OPEN_URL,
+                ClickEvent link = new ClickEvent(ClickEvent.Action.OPEN_URL,
                         (protocol!=null?protocol:"http") + "://" + url + (path!=null?path:""));
-                modifier.setChatClickable(link);
+                modifier.setClickEvent(link);
                 appendNewComponent();
-                modifier.setChatClickable(null);
+                modifier.setClickEvent(null);
                 if (!newWord) { //Force new word to prevent double checking
                     lastWord = i + 1;
                 }
@@ -150,29 +146,30 @@ public final class CraftChatMessage {
         }
 
         private void appendNewComponent() {
-            IChatBaseComponent addition = new ChatComponentText(builder.toString()).setChatModifier(modifier);
+            BaseComponent addition = new TextComponent(builder.toString());
+            addition.copyFormatting(modifier);
             builder = new StringBuilder();
-            modifier = modifier.clone();
+            modifier = modifier.duplicate();
             if (currentChatComponent == null) {
-                currentChatComponent = new ChatComponentText("");
+                currentChatComponent = new TextComponent("");
                 list.add(currentChatComponent);
             }
-            currentChatComponent.addSibling(addition);
+            currentChatComponent.addExtra(addition);
         }
 
-        private IChatBaseComponent[] getOutput() {
+        private BaseComponent[] getOutput() {
             return output;
         }
     }
 
-    public static IChatBaseComponent[] fromString(String message) {
+    public static BaseComponent[] fromString(String message) {
         return new FromString(message).getOutput();
     }
 
     private CraftChatMessage() {
     }
 
-    public static IChatBaseComponent[] fromString(String message, ChatModifier style) {
+    public static BaseComponent[] fromString(String message, BaseComponent style) {
         return new FromString(message, style).getOutput();
     }
 }

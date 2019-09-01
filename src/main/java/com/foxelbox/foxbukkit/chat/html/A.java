@@ -16,8 +16,8 @@
  */
 package com.foxelbox.foxbukkit.chat.html;
 
-import net.minecraft.server.v1_11_R1.ChatClickable;
-import net.minecraft.server.v1_11_R1.ChatModifier;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -28,7 +28,7 @@ public class A extends Element {
     private String href;
 
     @Override
-    protected void modifyStyle(ChatModifier style) {
-        style.setChatClickable(new ChatClickable(ChatClickable.EnumClickAction.OPEN_URL, href));
+    protected void modifyStyle(BaseComponent style) {
+        style.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, href));
     }
 }

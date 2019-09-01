@@ -16,9 +16,7 @@
  */
 package com.foxelbox.foxbukkit.chat;
 
-import com.foxelbox.dependencies.redis.CacheMap;
-import net.minecraft.server.v1_11_R1.Packet;
-import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
+import com.foxelbox.dependencies.config.Configuration;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -40,18 +38,18 @@ public class PlayerHelper {
 
     public PlayerHelper(FoxBukkitChat plugin) {
         this.plugin = plugin;
-        playerNameToUUID = plugin.redisManager.createCachedRedisMap("playerNameToUUID");
-        playerUUIDToName = plugin.redisManager.createCachedRedisMap("playerUUIDToName");
-        playerNicks = plugin.redisManager.createCachedRedisMap("playernicks");
+        playerNameToUUID = new Configuration(plugin.getDataFolder(), "playerNameToUUID");
+        playerUUIDToName = new Configuration(plugin.getDataFolder(), "playerUUIDToName");
+        playerNicks = new Configuration(plugin.getDataFolder(), "playernicks");
         ignoreCache = new HashMap<>();
-        ignoredByList = plugin.redisManager.createCachedRedisMap("ignoredByList").addOnChangeHook(new CacheMap.OnChangeHook() {
-            @Override
-            public void onEntryChanged(String key, String value) {
-                synchronized (ignoreCache) {
-                    putIgnoreCache(UUID.fromString(key), value);
-                }
+
+        Configuration ignoredByListC = new Configuration(plugin.getDataFolder(), "ignoredByList");
+        ignoredByListC.addOnChangeHook((key, value) -> {
+            synchronized (ignoreCache) {
+                putIgnoreCache(UUID.fromString(key), value);
             }
         });
+        ignoredByList = ignoredByListC;
     }
 
     private Set<UUID> putIgnoreCache(UUID uuid, String data) {
@@ -75,20 +73,5 @@ public class PlayerHelper {
             }
             return result;
         }
-    }
-
-    public void refreshPlayerListRedis(Player ignoreMe) {
-        Collection<? extends Player> players = plugin.getServer().getOnlinePlayers();
-        final String keyName = "playersOnline:" + plugin.configuration.getValue("server-name", "Main");
-        plugin.redisManager.del(keyName);
-        for(Player ply : players) {
-            if(ply.equals(ignoreMe))
-                continue;
-            plugin.redisManager.sadd(keyName, ply.getUniqueId().toString());
-        }
-    }
-
-    public void sendPacketToPlayer(final Player ply, final Packet packet) {
-        ((CraftPlayer)ply).getHandle().playerConnection.sendPacket(packet);
     }
 }

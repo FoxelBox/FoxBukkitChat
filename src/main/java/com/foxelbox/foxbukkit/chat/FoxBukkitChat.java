@@ -17,17 +17,9 @@
 package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.dependencies.config.Configuration;
-import com.foxelbox.dependencies.redis.RedisManager;
-import com.foxelbox.dependencies.threading.SimpleThreadCreator;
-import net.minecraft.server.v1_11_R1.PlayerConnection;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.Logger;
-import org.apache.logging.log4j.core.filter.AbstractFilter;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
+import com.foxelbox.foxbukkit.chat.json.ChatMessageOut;
+import com.foxelbox.foxbukkit.chat.json.UserInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,9 +28,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 public class FoxBukkitChat extends JavaPlugin {
     public FoxBukkitChat() {
@@ -48,9 +38,9 @@ public class FoxBukkitChat extends JavaPlugin {
     HashSet<UUID> registeredPlayers = new HashSet<>();
 
     public Configuration configuration;
-    public RedisManager redisManager;
-    public ChatQueueHandler chatQueueHandler;
     public PlayerHelper playerHelper;
+    public ChatHelper chatHelper;
+    public SharedFormatHandler formatHandler;
 
     public String getPlayerNick(Player ply) {
         return getPlayerNick(ply.getUniqueId());
@@ -60,78 +50,21 @@ public class FoxBukkitChat extends JavaPlugin {
         return playerHelper.playerNicks.get(uuid.toString());
     }
 
-    public RedisManager getRedisManager() {
-        return redisManager;
-    }
-
-    public ChatQueueHandler getChatQueueHandler() {
-        return chatQueueHandler;
-    }
-
-    private final HashSet<String> redisCommands = new HashSet<>();
-    public void loadRedisCommands() {
-        Set<String> commands = redisManager.smembers("chatLinkCommands");
-        synchronized (redisCommands) {
-            redisCommands.clear();
-            for (String str : commands)
-                redisCommands.add(str);
-        }
-    }
-
     @Override
     public void onDisable() {
         super.onDisable();
-
-        redisManager.stop();
     }
 
     @Override
     public void onEnable() {
         super.onEnable();
 
-        attachFilterTo((Logger) LogManager.getLogger(PlayerConnection.class));
-
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());
-        redisManager = new RedisManager(new SimpleThreadCreator(), configuration);
         playerHelper = new PlayerHelper(this);
-        chatQueueHandler = new ChatQueueHandler(this);
-
-        loadRedisCommands();
-
+        chatHelper = new ChatHelper(this);
+        formatHandler = new SharedFormatHandler(this);
         getServer().getPluginManager().registerEvents(new FBChatListener(), this);
-
-        playerHelper.refreshPlayerListRedis(null);
-
-        getServer().getPluginCommand("reloadclcommands").setExecutor(new CommandExecutor() {
-            @Override
-            public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-                loadRedisCommands();
-                return true;
-            }
-        });
-    }
-
-    private static void attachFilterTo(Logger logger) {
-        logger.addFilter(new FBLogFilter());
-    }
-
-    private static final Pattern PM_PATTERN = Pattern.compile("^[^ ]+ issued server command: /(pm|msg|conv|tell)( .*)?$");
-
-    static class FBLogFilter extends AbstractFilter {
-        @Override
-        public Result filter(LogEvent logEvent) {
-            if(logEvent.getLevel() != Level.INFO) {
-                return Result.NEUTRAL;
-            }
-
-            final String msg = logEvent.getMessage().getFormattedMessage().toLowerCase();
-            if(PM_PATTERN.matcher(msg).matches()) {
-                return Result.DENY;
-            }
-
-            return Result.NEUTRAL;
-        }
     }
 
     class FBChatListener implements Listener {
@@ -150,9 +83,8 @@ public class FoxBukkitChat extends JavaPlugin {
                 argStr = baseCmd.substring(posSpace).trim();
             }
 
-            if(redisCommands.contains(cmd)) {
-                event.setCancelled(true);
-                chatQueueHandler.sendMessage(ply, "/" + cmd + " " + argStr);
+            if (cmd.equals("me") || cmd.equals("action")) {
+                chatHelper.sendMessage(formatHandler.generateMe(new ChatMessageIn(FoxBukkitChat.this, ply), argStr));
             }
         }
 
@@ -161,34 +93,34 @@ public class FoxBukkitChat extends JavaPlugin {
             event.setCancelled(true);
             final String msg = event.getMessage();
             final Player ply = event.getPlayer();
-            chatQueueHandler.sendMessage(ply, msg);
+
+            ChatMessageIn cmsg = new ChatMessageIn(FoxBukkitChat.this, ply);
+            cmsg.contents = msg;
+            chatHelper.sendMessage(cmsg);
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerJoin(PlayerJoinEvent event) {
             playerHelper.refreshUUID(event.getPlayer());
-            playerHelper.refreshPlayerListRedis(null);
             event.setJoinMessage(null);
             if(registeredPlayers.add(event.getPlayer().getUniqueId())) {
-                chatQueueHandler.sendMessage(event.getPlayer(), "join", Messages.MessageType.PLAYERSTATE);
+                chatHelper.sendMessage(formatHandler.generateJoin(event.getPlayer().getUniqueId()));
             }
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerQuit(PlayerQuitEvent event) {
-            playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setQuitMessage(null);
             if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
-                chatQueueHandler.sendMessage(event.getPlayer(), "quit", Messages.MessageType.PLAYERSTATE);
+                chatHelper.sendMessage(formatHandler.generateLeave(event.getPlayer().getUniqueId()));
             }
         }
 
         @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         public void onPlayerKick(PlayerKickEvent event) {
-            playerHelper.refreshPlayerListRedis(event.getPlayer());
             event.setLeaveMessage(null);
             if(registeredPlayers.remove(event.getPlayer().getUniqueId())) {
-                chatQueueHandler.sendMessage(event.getPlayer(), "kick " + event.getReason(), Messages.MessageType.PLAYERSTATE);
+                chatHelper.sendMessage(formatHandler.generateKick(event.getPlayer().getUniqueId(), event.getReason()));
             }
         }
     }

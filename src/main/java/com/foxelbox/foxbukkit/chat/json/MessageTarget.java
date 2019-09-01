@@ -16,14 +16,12 @@
  */
 package com.foxelbox.foxbukkit.chat.json;
 
-import com.foxelbox.foxbukkit.chat.Messages;
-
 public class MessageTarget {
-    public MessageTarget(Messages.TargetType type, String[] filter) {
+    public MessageTarget(TargetType type, String[] filter) {
         this.type = type;
         this.filter = filter;
     }
 
-    public Messages.TargetType type;
+    public TargetType type;
     public String[] filter;
 }

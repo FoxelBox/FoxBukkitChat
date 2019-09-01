@@ -16,9 +16,8 @@
  */
 package com.foxelbox.foxbukkit.chat.html;
 
-import net.minecraft.server.v1_11_R1.ChatBaseComponent;
-import net.minecraft.server.v1_11_R1.ChatMessage;
-import net.minecraft.server.v1_11_R1.ChatModifier;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TranslatableComponent;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -31,16 +30,16 @@ public class Tr extends Element {
     private String key;
 
     @Override
-    protected void modifyStyle(ChatModifier style) {
+    protected void modifyStyle(BaseComponent style) {
         // TODO: get rid of this
     }
 
     @Override
-    public List<ChatBaseComponent> getNmsComponents(ChatModifier style, boolean condenseElements) throws Exception {
-        final List<ChatBaseComponent> components = super.getNmsComponents(style, true);
+    public List<BaseComponent> getNmsComponents(BaseComponent style, boolean condenseElements) throws Exception {
+        final List<BaseComponent> components = super.getNmsComponents(style, true);
 
-        final ChatBaseComponent translateComponent = new ChatMessage(key, components.toArray());
-        translateComponent.setChatModifier(style);
+        final BaseComponent translateComponent = new TranslatableComponent(key, components.toArray());
+        translateComponent.copyFormatting(style);
         return Arrays.asList(translateComponent);
     }
 }

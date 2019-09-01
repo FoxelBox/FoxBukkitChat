@@ -17,8 +17,6 @@
 package com.foxelbox.foxbukkit.chat.json;
 
 import com.foxelbox.foxbukkit.chat.FoxBukkitChat;
-import com.foxelbox.foxbukkit.chat.Messages;
-import com.foxelbox.foxbukkit.chat.ProtobufUUID;
 import com.foxelbox.foxbukkit.chat.Utils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -28,16 +26,18 @@ import java.util.UUID;
 public class ChatMessageIn {
     public ChatMessageIn(FoxBukkitChat plugin, CommandSender commandSender) {
         this(plugin);
-        if(commandSender instanceof Player)
+        if(commandSender instanceof Player) {
             this.from = new UserInfo(Utils.getCommandSenderUUID(commandSender), commandSender.getName());
-        else
+        } else {
             this.from = new UserInfo(Utils.CONSOLE_UUID, commandSender.getName());
+        }
     }
 
     public ChatMessageIn(FoxBukkitChat plugin) {
         this.timestamp = System.currentTimeMillis() / 1000;
         this.context = UUID.randomUUID();
         this.server = plugin.configuration.getValue("server-name", "Main");
+        this.type = MessageType.TEXT;
     }
 
     private ChatMessageIn() {
@@ -50,51 +50,7 @@ public class ChatMessageIn {
     public Long timestamp;
 
     public UUID context;
-    public Messages.MessageType type;
+    public MessageType type;
 
     public String contents;
-
-    public Messages.ChatMessageIn toProtoBuf() {
-        Messages.ChatMessageIn.Builder builder = Messages.ChatMessageIn.newBuilder();
-
-        if(server != null) {
-            builder.setServer(server);
-        }
-        if(from != null) {
-            builder.setFrom(Messages.UserInfo.newBuilder()
-                    .setUuid(ProtobufUUID.convertJavaToProtobuf(from.uuid))
-                    .setName(from.name));
-        }
-
-        builder.setTimestamp(timestamp);
-
-        builder.setContext(ProtobufUUID.convertJavaToProtobuf(context));
-        if(type != null && type != Messages.MessageType.TEXT) {
-            builder.setType(type);
-        }
-
-        if(contents != null) {
-            builder.setContents(contents);
-        }
-
-        return builder.build();
-    }
-
-    public static ChatMessageIn fromProtoBuf(Messages.ChatMessageIn message) {
-        ChatMessageIn ret = new ChatMessageIn();
-
-        ret.server = message.getServer();
-        if(message.getFrom() != null) {
-            ret.from = new UserInfo(ProtobufUUID.convertProtobufToJava(message.getFrom().getUuid()), message.getFrom().getName());
-        }
-
-        ret.timestamp = message.getTimestamp();
-
-        ret.context = ProtobufUUID.convertProtobufToJava(message.getContext());
-        ret.type = message.getType();
-
-        ret.contents = message.getContents();
-
-        return ret;
-    }
 }
