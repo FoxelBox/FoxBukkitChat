@@ -45,7 +45,16 @@ public class SharedFormatHandler {
     public String formatPlayerName(UUID uuid) {
         String nick = plugin.playerHelper.getPlayerNick(uuid);
         if (nick == null) {
-            return plugin.playerHelper.getNameByUUID(uuid);
+            nick = plugin.playerHelper.getNameByUUID(uuid);
+            if (nick == null) {
+                return null;
+            }
+        }
+        if (plugin.permissionsAdapter != null) {
+            final String tag = plugin.permissionsAdapter.getUserTag(uuid);
+            if (tag != null) {
+                return tag + nick;
+            }
         }
         return nick;
     }

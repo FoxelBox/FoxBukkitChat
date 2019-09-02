@@ -25,6 +25,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
@@ -43,18 +44,30 @@ public class FoxBukkitChat extends JavaPlugin {
     public ChatHelper chatHelper;
     public SharedFormatHandler formatHandler;
 
+    PermissionsAdapter permissionsAdapter;
+
     private void sendReply(CommandSender sender, String msg) {
         chatHelper.sendMessageTo(sender, "<color name=\"dark_purple\">[FBC]</color> " + msg);
     }
 
     @Override
     public void onDisable() {
+        this.permissionsAdapter = null;
         super.onDisable();
     }
 
     @Override
     public void onEnable() {
         super.onEnable();
+
+        final Plugin permissionsPlugin = getServer().getPluginManager().getPlugin("FoxBukkitPermissions");
+        if(permissionsPlugin == null) {
+            permissionsAdapter = null;
+            System.err.println("Could not find FoxBukkitPermissions. Disabling enhanced permissions API.");
+        } else {
+            permissionsAdapter = new PermissionsAdapter(permissionsPlugin);
+            System.out.println("Hooked FoxBukkitPermissions. Enabled enhanced permissions API.");
+        }
 
         getDataFolder().mkdirs();
         configuration = new Configuration(getDataFolder());

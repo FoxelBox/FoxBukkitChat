@@ -1,6 +1,7 @@
 name: FoxBukkitChat
 main: com.foxelbox.foxbukkit.chat.FoxBukkitChat
 version: 1.3.0
+softdepend: [FoxBukkitPermissions]
 commands:
   me:
     description: /me
