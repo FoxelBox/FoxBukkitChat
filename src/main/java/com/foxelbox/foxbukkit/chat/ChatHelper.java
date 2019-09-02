@@ -17,10 +17,10 @@
 package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.foxbukkit.chat.json.*;
+import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.io.Console;
 import java.util.*;
 
 public class ChatHelper {
@@ -45,34 +45,34 @@ public class ChatHelper {
 
     public void sendMessage(final ChatMessageOut chatMessageOut) {
         try {
-            Collection<? extends Player> allPlayers = plugin.getServer().getOnlinePlayers();
-            final List<Player> targetPlayers = new ArrayList<>();
+            final Set<Player> targetPlayers = new HashSet<>();
             boolean sendToConsole = false;
             switch(chatMessageOut.to.type) {
                 case ALL:
-                    targetPlayers.addAll(allPlayers);
+                    targetPlayers.addAll(plugin.getServer().getOnlinePlayers());
                     sendToConsole = true;
                     break;
                 case PERMISSION:
                     sendToConsole = true;
                     for(String permission : chatMessageOut.to.filter)
-                        for (Player player : allPlayers) {
-                            if (player.hasPermission(permission) && !targetPlayers.contains(player)) {
+                        for (Player player : plugin.getServer().getOnlinePlayers()) {
+                            if (player.hasPermission(permission)) {
                                 targetPlayers.add(player);
                             }
                         }
                     break;
                 case PLAYER:
+                    final Server srv = plugin.getServer();
                     for(String playerUUID : chatMessageOut.to.filter) {
                         if (playerUUID.equals(Utils.CONSOLE_UUID.toString())) {
                             sendToConsole = true;
                             continue;
                         }
 
-                        for (Player player : allPlayers) {
-                            if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player)) {
-                                targetPlayers.add(player);
-                            }
+                        final UUID uuid = UUID.fromString(playerUUID);
+                        final Player ply = srv.getPlayer(uuid);
+                        if (ply != null && ply.isOnline()) {
+                            targetPlayers.add(ply);
                         }
                     }
                     break;
@@ -112,7 +112,7 @@ public class ChatHelper {
                 if (chatMessageOut.server != null && !chatMessageOut.server.isEmpty() && !chatMessageOut.server.equals(plugin.configuration.getValue("server-name", "Main"))) {
                     chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
                 }
-                final List<CommandSender> targets = new ArrayList<>(targetPlayers);
+                final Set<CommandSender> targets = new HashSet<>(targetPlayers);
                 if (sendToConsole) {
                     targets.add(plugin.getServer().getConsoleSender());
                 }
