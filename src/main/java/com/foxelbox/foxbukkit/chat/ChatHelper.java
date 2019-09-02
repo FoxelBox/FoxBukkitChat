@@ -99,15 +99,7 @@ public class ChatHelper {
             }
 
             if(chatMessageOut.from != null && chatMessageOut.from.uuid != null) {
-                Set<UUID> ignoringSet = plugin.playerHelper.getIgnoredBy(chatMessageOut.from.uuid);
-                if(ignoringSet != null) {
-                    Iterator<Player> playerIterator = targetPlayers.iterator();
-                    while(playerIterator.hasNext()) {
-                        if(ignoringSet.contains(playerIterator.next().getUniqueId())) {
-                            playerIterator.remove();
-                        }
-                    }
-                }
+                targetPlayers.removeIf(player -> plugin.playerHelper.getIgnore(player.getUniqueId()).contains(chatMessageOut.from.uuid));
             }
 
             if(targetPlayers.isEmpty()) {

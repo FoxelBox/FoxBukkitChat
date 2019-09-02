@@ -25,9 +25,12 @@ import java.util.UUID;
 
 @SuppressWarnings("UnusedDeclaration")
 public class Utils {
-    public static String concat(Collection<String> parts, int start, String defaultText) {
-        // TODO: optimize
-        return concatArray(parts.toArray(new String[parts.size()]), start, defaultText);
+    public static String concat(Collection parts, int start, String defaultText, char split) {
+        return concatArray(parts.toArray(), start, defaultText, split);
+    }
+
+    public static String concat(Collection parts, int start, String defaultText) {
+        return concatArray(parts.toArray(), start, defaultText);
     }
 
     public static UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("[CONSOLE]".getBytes());
@@ -57,18 +60,22 @@ public class Utils {
         return s;
     }
 
-    public static String concatArray(String[] array, int start, String defaultText) {
+    public static String concatArray(Object[] array, int start, String defaultText) {
+        return concatArray(array, start, defaultText, ' ');
+    }
+
+    public static String concatArray(Object[] array, int start, String defaultText, char split) {
         if (array.length <= start) {
             return defaultText;
         }
 
         if (array.length <= start + 1) {
-            return array[start]; // optimization
+            return array[start].toString(); // optimization
         }
 
-        StringBuilder ret = new StringBuilder(array[start]);
+        StringBuilder ret = new StringBuilder(array[start].toString());
         for(int i = start + 1; i < array.length; i++) {
-            ret.append(' ');
+            ret.append(split);
             ret.append(array[i]);
         }
         return ret.toString();

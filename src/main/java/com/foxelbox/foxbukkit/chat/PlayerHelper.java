@@ -23,12 +23,12 @@ import java.util.*;
 
 public class PlayerHelper {
     private FoxBukkitChat plugin;
-    public Map<String,String> playerNameToUUID;
-    public Map<String,String> playerUUIDToName;
+    public Map<String, String> playerNameToUUID;
+    public Map<String, String> playerUUIDToName;
 
-    public Map<String,String> playerNicks;
+    public Map<String, String> playerNicks;
 
-    public Map<String,String> ignoredByList;
+    public Map<String, String> ignoreList;
     private final Map<UUID, Set<UUID>> ignoreCache;
 
     public void refreshUUID(Player player) {
@@ -43,13 +43,13 @@ public class PlayerHelper {
         playerNicks = new Configuration(plugin.getDataFolder(), "playernicks.txt");
         ignoreCache = new HashMap<>();
 
-        Configuration ignoredByListC = new Configuration(plugin.getDataFolder(), "ignoredByList.txt");
-        ignoredByListC.addOnChangeHook((key, value) -> {
+        Configuration ignoreListC = new Configuration(plugin.getDataFolder(), "ignoredList.txt");
+        ignoreListC.addOnChangeHook((key, value) -> {
             synchronized (ignoreCache) {
                 putIgnoreCache(UUID.fromString(key), value);
             }
         });
-        ignoredByList = ignoredByListC;
+        ignoreList = ignoreListC;
     }
 
     private Set<UUID> putIgnoreCache(UUID uuid, String data) {
@@ -65,11 +65,11 @@ public class PlayerHelper {
         return dataSet;
     }
 
-    public Set<UUID> getIgnoredBy(UUID uuid) {
+    public Set<UUID> getIgnore(UUID uuid) {
         synchronized (ignoreCache) {
             Set<UUID> result = ignoreCache.get(uuid);
             if(result == null) {
-                result = putIgnoreCache(uuid, ignoredByList.get(uuid.toString()));
+                result = putIgnoreCache(uuid, ignoreList.get(uuid.toString()));
             }
             return result;
         }

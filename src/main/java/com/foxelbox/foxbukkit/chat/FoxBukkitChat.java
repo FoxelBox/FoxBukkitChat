@@ -29,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class FoxBukkitChat extends JavaPlugin {
@@ -78,6 +79,45 @@ public class FoxBukkitChat extends JavaPlugin {
             return true;
         });
         getServer().getPluginCommand("ignore").setExecutor((commandSender, command, cmd, args) -> {
+            final String subCmd = args[0].toLowerCase();
+            UUID src = Utils.getCommandSenderUUID(commandSender);
+
+            switch (subCmd) {
+                case "add":
+                case "remove":
+                    boolean remove = subCmd.charAt(0) == 'r';
+
+                    Player ply = FoxBukkitChat.this.getServer().getPlayer(args[1]);
+                    UUID target;
+                    if (ply == null) {
+                        target = UUID.fromString(FoxBukkitChat.this.playerHelper.playerNameToUUID.get(args[1]));
+                    } else {
+                        target = ply.getUniqueId();
+                    }
+                    if (target == null) {
+                        chatHelper.sendMessage(commandSender, "Could not find player");
+                        return true;
+                    }
+
+                    Set<UUID> old = playerHelper.getIgnore(src);
+                    if (remove) {
+                        chatHelper.sendMessage(commandSender, "Removed " + ((ply != null) ? ply.getName() : args[1]) + " from your ignore list");
+                        old.remove(target);
+                    } else {
+                        chatHelper.sendMessage(commandSender, "Added " + ((ply != null) ? ply.getName() : args[1]) + " to your ignore list");
+                        old.add(target);
+                    }
+                    playerHelper.ignoreList.put(src.toString(), Utils.concat(old, 0, "", ','));
+                    return true;
+                case "list":
+                    String list = playerHelper.ignoreList.get(src.toString());
+                    if (list == null) {
+                        chatHelper.sendMessage(commandSender, "You have not ignored anyone");
+                        return true;
+                    }
+                    chatHelper.sendMessage(commandSender, "Ignore list: " + list);
+                    return true;
+            }
             return false;
         });
     }
