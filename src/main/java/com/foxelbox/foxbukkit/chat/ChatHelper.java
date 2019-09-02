@@ -54,12 +54,13 @@ public class ChatHelper {
                     break;
                 case PERMISSION:
                     sendToConsole = true;
-                    for(String permission : chatMessageOut.to.filter)
+                    for(String permission : chatMessageOut.to.filter) {
                         for (Player player : plugin.getServer().getOnlinePlayers()) {
                             if (player.hasPermission(permission)) {
                                 targetPlayers.add(player);
                             }
                         }
+                    }
                     break;
                 case PLAYER:
                     final Server srv = plugin.getServer();
