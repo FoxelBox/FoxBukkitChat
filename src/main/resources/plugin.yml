@@ -2,7 +2,13 @@ name: FoxBukkitChat
 main: com.foxelbox.foxbukkit.chat.FoxBukkitChat
 version: 1.3.0
 commands:
-  reloadclcommands:
-    description: Reloads the ChatLink command list
-    permission: foxbukkit.chatlink.reloadcommands
+  me:
+    description: /me
+    permission: foxbukkit.me
     usage: /<command>
+    aliases:
+      - action
+  ignore:
+    description: Ignore system management
+    permission: foxbukkit.ignore
+    usage: /<command> [add/remove/list/clear] Player

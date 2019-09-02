@@ -58,11 +58,13 @@ public class Utils {
     }
 
     public static String concatArray(String[] array, int start, String defaultText) {
-        if (array.length <= start)
+        if (array.length <= start) {
             return defaultText;
+        }
 
-        if (array.length <= start + 1)
+        if (array.length <= start + 1) {
             return array[start]; // optimization
+        }
 
         StringBuilder ret = new StringBuilder(array[start]);
         for(int i = start + 1; i < array.length; i++) {

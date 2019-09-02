@@ -18,6 +18,8 @@ package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
+import org.bukkit.Location;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,6 +28,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 public class FoxBukkitChat extends JavaPlugin {
@@ -67,30 +70,19 @@ public class FoxBukkitChat extends JavaPlugin {
         chatHelper = new ChatHelper(this);
         formatHandler = new SharedFormatHandler(this);
         getServer().getPluginManager().registerEvents(new FBChatListener(), this);
+        getServer().getPluginCommand("me").setExecutor((commandSender, command, cmd, args) -> {
+            if (args.length < 1) {
+                return false;
+            }
+            chatHelper.sendMessage(formatHandler.generateMe(new ChatMessageIn(FoxBukkitChat.this, commandSender), Utils.concatArray(args, 0, "")));
+            return true;
+        });
+        getServer().getPluginCommand("ignore").setExecutor((commandSender, command, cmd, args) -> {
+            return false;
+        });
     }
 
     class FBChatListener implements Listener {
-        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-        public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-            final Player ply = event.getPlayer();
-            final String baseCmd = event.getMessage().substring(1).trim();
-
-            int posSpace = baseCmd.indexOf(' ');
-            String cmd; String argStr;
-            if (posSpace < 0) {
-                cmd = baseCmd.toLowerCase();
-                argStr = "";
-            } else {
-                cmd = baseCmd.substring(0, posSpace).trim().toLowerCase();
-                argStr = baseCmd.substring(posSpace).trim();
-            }
-
-            if (cmd.equals("me") || cmd.equals("action")) {
-                event.setCancelled(true);
-                chatHelper.sendMessage(formatHandler.generateMe(new ChatMessageIn(FoxBukkitChat.this, ply), argStr));
-            }
-        }
-
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onPlayerChat(AsyncPlayerChatEvent event) {
             event.setCancelled(true);
