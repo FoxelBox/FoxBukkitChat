@@ -18,6 +18,7 @@ package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
 import com.foxelbox.foxbukkit.chat.json.ChatMessageOut;
+import com.foxelbox.foxbukkit.chat.json.TargetType;
 import com.foxelbox.foxbukkit.chat.json.UserInfo;
 
 import java.util.UUID;
@@ -31,6 +32,9 @@ public class SharedFormatHandler {
     public static final String JOIN_FORMAT = "<color name=\"dark_green\">[+]</color> " + PLAYER_FORMAT + " <color name=\"yellow\">joined!</color>";
     public static final Pattern REMOVE_DISALLOWED_CHARS = Pattern.compile("[\u00a7\r\n\t]");
     public static final String EMOTE_FORMAT = "* " + PLAYER_FORMAT + " <color name=\"gray\">%4$s</color>";
+    private static final String PM_SEND_FORMAT = "<color name=\"yellow\">[PM &gt;]</color> " + MESSAGE_FORMAT;
+    private static final String PM_RECEIVE_FORMAT = "<color name=\"yellow\">[PM &lt;]</color> " + MESSAGE_FORMAT;
+
 
     private final FoxBukkitChat plugin;
 
@@ -39,25 +43,28 @@ public class SharedFormatHandler {
     }
 
     public String formatPlayerName(UUID uuid) {
-        String nick = plugin.getPlayerNick(uuid);
+        String nick = plugin.playerHelper.getPlayerNick(uuid);
         if (nick == null) {
-            return plugin.playerHelper.playerUUIDToName.get(uuid.toString());
+            return plugin.playerHelper.getNameByUUID(uuid);
         }
         return nick;
     }
 
-    public ChatMessageOut generateMe(ChatMessageIn messageIn, String argStr)
+    public ChatMessageOut[] generatePM(ChatMessageIn messageIn, UUID target) {
+        final String msg = SharedFormatHandler.REMOVE_DISALLOWED_CHARS.matcher(messageIn.contents).replaceAll("");
+        final ChatMessageOut msgSend = generateFormat(messageIn.from.uuid, PM_SEND_FORMAT, msg);
+        msgSend.to.type = TargetType.PLAYER;
+        msgSend.to.filter = new String[] { messageIn.from.uuid.toString() };
+        final ChatMessageOut msgRecv = generateFormat(messageIn.from.uuid, PM_RECEIVE_FORMAT, msg);
+        msgRecv.to.type = TargetType.PLAYER;
+        msgRecv.to.filter = new String[] { target.toString() };
+        return new ChatMessageOut[] { msgSend, msgRecv };
+    }
+
+    public ChatMessageOut generateMe(ChatMessageIn messageIn)
     {
-        argStr = SharedFormatHandler.REMOVE_DISALLOWED_CHARS.matcher(argStr).replaceAll("");
-
-        final ChatMessageOut message = new ChatMessageOut(messageIn);
-
-        message.setContents(
-                EMOTE_FORMAT,
-                new String[] {
-                        messageIn.from.name, messageIn.from.uuid.toString(), formatPlayerName(messageIn.from.uuid), argStr
-                });
-        return message;
+        final String msg = SharedFormatHandler.REMOVE_DISALLOWED_CHARS.matcher(messageIn.contents).replaceAll("");
+        return generateFormat(messageIn.from.uuid, EMOTE_FORMAT, msg);
     }
 
     public ChatMessageOut generateJoin(UUID ply) {
@@ -70,19 +77,17 @@ public class SharedFormatHandler {
 
     public ChatMessageOut generateKick(UUID ply, String msg) {
         msg = SharedFormatHandler.REMOVE_DISALLOWED_CHARS.matcher(msg).replaceAll("");
-
         return generateFormat(ply, KICK_FORMAT, msg);
     }
 
     public ChatMessageOut generateText(UUID ply, String msg) {
         msg = SharedFormatHandler.REMOVE_DISALLOWED_CHARS.matcher(msg).replaceAll("");
-
         return generateFormat(ply, MESSAGE_FORMAT, msg);
     }
 
     private ChatMessageOut generateFormat(UUID ply, String format, String arg) {
         final ChatMessageOut msg = new ChatMessageOut(plugin, new UserInfo(plugin, ply));
-        msg.setContents(format, new String[] { formatPlayerName(ply), ply.toString(), plugin.playerHelper.playerUUIDToName.get(ply.toString()), arg });
+        msg.setContents(format, new String[] { plugin.playerHelper.getNameByUUID(ply), ply.toString(), formatPlayerName(ply), arg });
         return msg;
     }
 }

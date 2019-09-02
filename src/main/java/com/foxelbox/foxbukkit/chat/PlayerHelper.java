@@ -23,20 +23,20 @@ import java.util.*;
 
 public class PlayerHelper {
     private FoxBukkitChat plugin;
-    public Map<String, String> playerNameToUUID;
-    public Map<String, String> playerUUIDToName;
+    private Configuration playerNameToUUID;
+    private Configuration playerUUIDToName;
 
-    public Map<String, String> playerNicks;
+    public Configuration playerNicks;
 
-    public Map<String, String> ignoreList;
+    Configuration ignoreList;
     private final Map<UUID, Set<UUID>> ignoreCache;
 
-    public void refreshUUID(Player player) {
+    void refreshUUID(Player player) {
         playerUUIDToName.put(player.getUniqueId().toString(), player.getName());
         playerNameToUUID.put(player.getName().toLowerCase(), player.getUniqueId().toString());
     }
 
-    public PlayerHelper(FoxBukkitChat plugin) {
+    PlayerHelper(FoxBukkitChat plugin) {
         this.plugin = plugin;
         playerNameToUUID = new Configuration(plugin.getDataFolder(), "playerNameToUUID.txt");
         playerUUIDToName = new Configuration(plugin.getDataFolder(), "playerUUIDToName.txt");
@@ -50,6 +50,13 @@ public class PlayerHelper {
             }
         });
         ignoreList = ignoreListC;
+    }
+
+    void reload() {
+        this.playerNameToUUID.load();
+        this.playerUUIDToName.load();
+        this.playerNicks.load();
+        this.ignoreList.load();
     }
 
     private Set<UUID> putIgnoreCache(UUID uuid, String data) {
@@ -73,5 +80,25 @@ public class PlayerHelper {
             }
             return result;
         }
+    }
+
+    public UUID getUUIDByName(String name) {
+        String uuid = playerNameToUUID.get(name.toLowerCase());
+        if (uuid == null) {
+            return null;
+        }
+        return UUID.fromString(uuid);
+    }
+
+    public String getNameByUUID(UUID uuid) {
+        return playerUUIDToName.get(uuid.toString());
+    }
+
+    public String getPlayerNick(Player ply) {
+        return getPlayerNick(ply.getUniqueId());
+    }
+
+    public String getPlayerNick(UUID uuid) {
+        return playerNicks.get(uuid.toString());
     }
 }

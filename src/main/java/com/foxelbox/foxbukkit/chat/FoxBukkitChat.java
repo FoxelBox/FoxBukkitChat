@@ -18,6 +18,8 @@ package com.foxelbox.foxbukkit.chat;
 
 import com.foxelbox.dependencies.config.Configuration;
 import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
+import com.foxelbox.foxbukkit.chat.json.ChatMessageOut;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,11 +33,7 @@ import java.util.UUID;
 
 public class FoxBukkitChat extends JavaPlugin {
     public FoxBukkitChat() {
-        try {
-            Class.forName("com.sun.xml.bind.v2.ContextFactory");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     HashSet<UUID> registeredPlayers = new HashSet<>();
@@ -45,12 +43,8 @@ public class FoxBukkitChat extends JavaPlugin {
     public ChatHelper chatHelper;
     public SharedFormatHandler formatHandler;
 
-    public String getPlayerNick(Player ply) {
-        return getPlayerNick(ply.getUniqueId());
-    }
-
-    public String getPlayerNick(UUID uuid) {
-        return playerHelper.playerNicks.get(uuid.toString());
+    private void sendReply(CommandSender sender, String msg) {
+        chatHelper.sendMessageTo(sender, "<color name=\"dark_purple\">[FBC]</color> " + msg);
     }
 
     @Override
@@ -72,36 +66,67 @@ public class FoxBukkitChat extends JavaPlugin {
             if (args.length < 1) {
                 return false;
             }
-            chatHelper.sendMessage(formatHandler.generateMe(new ChatMessageIn(FoxBukkitChat.this, commandSender), Utils.concatArray(args, 0, "")));
+            ChatMessageIn msg = new ChatMessageIn(FoxBukkitChat.this, commandSender);
+            msg.contents = Utils.concatArray(args, 0, "");
+            chatHelper.sendMessage(formatHandler.generateMe(msg));
+            return true;
+        });
+        getServer().getPluginCommand("reloadchat").setExecutor(((commandSender, command, s, strings) -> {
+            playerHelper.reload();
+            sendReply(commandSender, "Reloading chat config");
+            return true;
+        }));
+        getServer().getPluginCommand("pm").setExecutor((commandSender, command, cmd, args) -> {
+            if (args.length < 2) {
+                return false;
+            }
+            Player targetPly = FoxBukkitChat.this.getServer().getPlayer(args[0]);
+            if (targetPly == null) {
+                sendReply(commandSender, "Could not find player");
+                return true;
+            }
+
+            ChatMessageIn msg = new ChatMessageIn(FoxBukkitChat.this, commandSender);
+            msg.contents = Utils.concatArray(args, 1, "");
+            for (ChatMessageOut msgOut : formatHandler.generatePM(msg, targetPly.getUniqueId())) {
+                chatHelper.sendMessage(msgOut);
+            }
             return true;
         });
         getServer().getPluginCommand("ignore").setExecutor((commandSender, command, cmd, args) -> {
+            if (args.length < 1) {
+                return false;
+            }
+
             final String subCmd = args[0].toLowerCase();
             UUID src = Utils.getCommandSenderUUID(commandSender);
 
             switch (subCmd) {
                 case "add":
                 case "remove":
+                    if (args.length < 2) {
+                        return false;
+                    }
                     boolean remove = subCmd.charAt(0) == 'r';
 
                     Player ply = FoxBukkitChat.this.getServer().getPlayer(args[1]);
                     UUID target;
                     if (ply == null) {
-                        target = UUID.fromString(FoxBukkitChat.this.playerHelper.playerNameToUUID.get(args[1]));
+                        target = FoxBukkitChat.this.playerHelper.getUUIDByName(args[1]);
                     } else {
                         target = ply.getUniqueId();
                     }
                     if (target == null) {
-                        chatHelper.sendMessage(commandSender, "Could not find player");
+                        sendReply(commandSender, "Could not find player");
                         return true;
                     }
 
                     Set<UUID> old = playerHelper.getIgnore(src);
                     if (remove) {
-                        chatHelper.sendMessage(commandSender, "Removed " + ((ply != null) ? ply.getName() : args[1]) + " from your ignore list");
+                        sendReply(commandSender, "Removed " + ((ply != null) ? ply.getName() : args[1]) + " from your ignore list");
                         old.remove(target);
                     } else {
-                        chatHelper.sendMessage(commandSender, "Added " + ((ply != null) ? ply.getName() : args[1]) + " to your ignore list");
+                        sendReply(commandSender, "Added " + ((ply != null) ? ply.getName() : args[1]) + " to your ignore list");
                         old.add(target);
                     }
                     playerHelper.ignoreList.put(src.toString(), Utils.concat(old, 0, "", ','));
@@ -109,10 +134,10 @@ public class FoxBukkitChat extends JavaPlugin {
                 case "list":
                     String list = playerHelper.ignoreList.get(src.toString());
                     if (list == null) {
-                        chatHelper.sendMessage(commandSender, "You have not ignored anyone");
+                        sendReply(commandSender, "You have not ignored anyone");
                         return true;
                     }
-                    chatHelper.sendMessage(commandSender, "Ignore list: " + list);
+                    sendReply(commandSender, "Ignore list: " + list);
                     return true;
             }
             return false;

@@ -136,7 +136,7 @@ public class HTMLParser {
 
             for (CommandSender commandSender : targetPlayers) {
                 if (!(commandSender instanceof Player)) {
-                    commandSender.sendMessage(parsePlain(format));
+                    commandSender.sendMessage(packet.toLegacyText());
                     continue;
                 }
 

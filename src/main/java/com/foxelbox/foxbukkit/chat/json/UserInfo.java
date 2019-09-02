@@ -17,7 +17,8 @@
 package com.foxelbox.foxbukkit.chat.json;
 
 import com.foxelbox.foxbukkit.chat.FoxBukkitChat;
-import org.bukkit.entity.Player;
+import com.foxelbox.foxbukkit.chat.Utils;
+import org.bukkit.command.CommandSender;
 
 import java.util.UUID;
 
@@ -31,8 +32,8 @@ public class UserInfo {
         this(ply, plugin.formatHandler.formatPlayerName(ply));
     }
 
-    public UserInfo(FoxBukkitChat plugin, Player ply) {
-        this(plugin, ply.getUniqueId());
+    public UserInfo(FoxBukkitChat plugin, CommandSender ply) {
+        this(plugin, Utils.getCommandSenderUUID(ply));
     }
 
     public UUID uuid;

@@ -16,12 +16,11 @@
  */
 package com.foxelbox.foxbukkit.chat;
 
-import com.foxelbox.foxbukkit.chat.json.ChatMessageIn;
-import com.foxelbox.foxbukkit.chat.json.ChatMessageOut;
-import com.foxelbox.foxbukkit.chat.json.MessageType;
+import com.foxelbox.foxbukkit.chat.json.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.Console;
 import java.util.*;
 
 public class ChatHelper {
@@ -31,48 +30,51 @@ public class ChatHelper {
         this.plugin = plugin;
     }
 
-    public void sendMessage(final CommandSender player, final String message) {
-        sendMessage(player, message, MessageType.TEXT);
-    }
-
-    public void sendMessage(final ChatMessageIn messageIn) {
-        if(messageIn == null) {
+    public void sendMessageTo(final CommandSender player, final String message) {
+        if(player == null || message == null) {
             throw new NullPointerException();
         }
 
-        sendMessage(new ChatMessageOut(messageIn));
-    }
-
-    public void sendMessage(final CommandSender player, final String message, final MessageType type) {
-        if(player == null || message == null)
-            throw new NullPointerException();
-        ChatMessageIn messageIn = new ChatMessageIn(plugin, player);
-        messageIn.contents = message;
-        if(type != null) {
-            messageIn.type = type;
-        }
-        sendMessage(messageIn);
+        UserInfo user = new UserInfo(plugin, player);
+        ChatMessageOut msgOut = new ChatMessageOut(plugin, user);
+        msgOut.contents = message;
+        msgOut.to = new MessageTarget(TargetType.PLAYER, new String[] { user.uuid.toString() });
+        msgOut.type = MessageType.TEXT;
+        sendMessage(msgOut);
     }
 
     public void sendMessage(final ChatMessageOut chatMessageOut) {
         try {
             Collection<? extends Player> allPlayers = plugin.getServer().getOnlinePlayers();
             final List<Player> targetPlayers = new ArrayList<>();
+            boolean sendToConsole = false;
             switch(chatMessageOut.to.type) {
                 case ALL:
                     targetPlayers.addAll(allPlayers);
+                    sendToConsole = true;
                     break;
                 case PERMISSION:
+                    sendToConsole = true;
                     for(String permission : chatMessageOut.to.filter)
-                        for (Player player : allPlayers)
-                            if (player.hasPermission(permission) && !targetPlayers.contains(player))
+                        for (Player player : allPlayers) {
+                            if (player.hasPermission(permission) && !targetPlayers.contains(player)) {
                                 targetPlayers.add(player);
+                            }
+                        }
                     break;
                 case PLAYER:
-                    for(String playerUUID : chatMessageOut.to.filter)
-                        for (Player player : allPlayers)
-                            if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player))
+                    for(String playerUUID : chatMessageOut.to.filter) {
+                        if (playerUUID.equals(Utils.CONSOLE_UUID.toString())) {
+                            sendToConsole = true;
+                            continue;
+                        }
+
+                        for (Player player : allPlayers) {
+                            if (player.getUniqueId().equals(UUID.fromString(playerUUID)) && !targetPlayers.contains(player)) {
                                 targetPlayers.add(player);
+                            }
+                        }
+                    }
                     break;
             }
 
@@ -102,7 +104,7 @@ public class ChatHelper {
                 targetPlayers.removeIf(player -> plugin.playerHelper.getIgnore(player.getUniqueId()).contains(chatMessageOut.from.uuid));
             }
 
-            if(targetPlayers.isEmpty()) {
+            if(targetPlayers.isEmpty() && !sendToConsole) {
                 return;
             }
 
@@ -110,7 +112,11 @@ public class ChatHelper {
                 if (chatMessageOut.server != null && !chatMessageOut.server.isEmpty() && !chatMessageOut.server.equals(plugin.configuration.getValue("server-name", "Main"))) {
                     chatMessageOut.contents = "<color name=\"dark_green\">[" + chatMessageOut.server + "]</color> " + chatMessageOut.contents;
                 }
-                HTMLParser.sendToPlayers(plugin, targetPlayers, chatMessageOut.contents);
+                final List<CommandSender> targets = new ArrayList<>(targetPlayers);
+                if (sendToConsole) {
+                    targets.add(plugin.getServer().getConsoleSender());
+                }
+                HTMLParser.sendToPlayers(plugin, targets, chatMessageOut.contents);
             }
         }
         catch (Exception e) {

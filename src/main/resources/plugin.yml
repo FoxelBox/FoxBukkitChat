@@ -12,3 +12,14 @@ commands:
     description: Ignore system management
     permission: foxbukkit.ignore
     usage: /<command> [add/remove/list/clear] Player
+  pm:
+    description: Private message
+    permission: foxbukkit.pm
+    usage: /<command>
+    aliases:
+      - whisper
+      - tell
+  reloadchat:
+    description: Reload chat
+    permission: foxbukkit.reloadchat
+    usage: /<command>
