@@ -86,6 +86,7 @@ public class FoxBukkitChat extends JavaPlugin {
             }
 
             if (cmd.equals("me") || cmd.equals("action")) {
+                event.setCancelled(true);
                 chatHelper.sendMessage(formatHandler.generateMe(new ChatMessageIn(FoxBukkitChat.this, ply), argStr));
             }
         }

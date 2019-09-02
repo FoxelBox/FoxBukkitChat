@@ -23,7 +23,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.xml.sax.*;
 
-import javax.xml.bind.JAXB;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshallerHandler;
@@ -141,7 +140,7 @@ public class HTMLParser {
                     continue;
                 }
 
-                ((Player)commandSender).spigot().sendMessage(packet);
+                commandSender.spigot().sendMessage(packet);
             }
 
             return true;

@@ -69,7 +69,9 @@ public class ChatMessageOut {
 
     public ChatMessageOut(ChatMessageIn messageIn) {
         this(messageIn.server, messageIn.from);
-        this.setContentsPlain(messageIn.contents);
+        if (messageIn.contents != null) {
+            this.setContentsPlain(messageIn.contents);
+        }
         this.context = messageIn.context;
     }
 
